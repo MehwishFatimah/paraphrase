@@ -1,0 +1,3 @@
+[submodule "bilstm_stagging"]
+	path = bilstm_stagging
+	url = https://github.com/jungokasai/bilstm_stagging.git
