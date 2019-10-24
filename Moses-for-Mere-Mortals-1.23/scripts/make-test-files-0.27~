@@ -26,13 +26,13 @@
 # The values of the variables that follow should be filled according to your needs:
 #####################################################################################
 #Base path of Moses installation
-mosesdir="$HOME/paraphrase/MMM"
+mosesdir="$HOME/Desktop/Machine-Translation/MMM"
 #Source language abbreviation
-lang1=ref
+lang1=pt
 #Target language abbreviation
-lang2=para
+lang2=en
 #Corpus from which you want to create the training, tuning and test files
-corpusbasename=paraphrase
+corpusbasename=200000
 #The corpus is divided into x sectors and then each sector is randomly sampled to get y segments per sector
 #Total number of sectors used in each language to create the tuning files 
 tuning_totalnumsectors=100

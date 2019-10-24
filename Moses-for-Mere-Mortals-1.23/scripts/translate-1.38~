@@ -39,12 +39,12 @@
 #####################################################################################
 
 #Full path of the base directory of your Moses system 
-mosesdir="$HOME/paraphrase/MMM"
+mosesdir="$HOME/Desktop/Machine-Translation/MMM"
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Even if you are using the demonstration corpus, you have to fill the $report_file parameter so that the script can be executed !!! 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #Name of the report of the training of the corpus to be used (time-saving tip: copy and paste it here; the directory where you can find the report files is $mosesdir/reports); example of a possible name of a report file: train.day-2014-11-01.time-21-34-23.pt-en.C-800-new.for_train-60-1.LM-800-new.MM-1.Tu-0.report) (!!! omit the path !!!; you MUST fill in this parameter !!!)
-report_file=ref-para.C-paraphrase.for_train-60-1.LM-paraphrase.MM-1.Tu-0.day-2019-10-23.time-20-23-20.report
+report_file=
 
 #Create a translation report when translations are finished; 1 = Do; Any other value = Do not
 create_translation_report=1

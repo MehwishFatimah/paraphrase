@@ -30,7 +30,7 @@
 #####################################################################################
 
 #Full path of the base directory of your Moses system 
-mosesdir="$HOME/paraphrase/MMM"
+mosesdir="$HOME/Desktop/Machine-Translation/MMM"
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #NOTE 1: The corpus that you want to train, together with the respective tuning files (if different), the testing files (if different), the file used for recasing, and the file used to build the language model (if different) should be placed in $mosesdir/corpora_for_training !!!
@@ -41,29 +41,29 @@ mosesdir="$HOME/paraphrase/MMM"
 # !!! The names of the languages should neither include spaces nor special characters, like asterisks, backslashes or question marks. Try to stick with letters, numbers, and the underscore, dash and dot if you want to avoid surprises. Avoid using a dash and the dot as the first character of the name. A 2 letter abbreviation is probably the ideal setting  !!!
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #Abbreviation of language 1 (source language) 
-lang1=ref
+lang1=pt
 #Abbreviation of language 2 (target language) 
-lang2=para
+lang2=en
 #=========================================================== 2. FILES ===================================================================================
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # !!! The names of the files should not include spaces, as well as special characters, like asterisks, backslashes or question marks. Try to stick with letters, numbers, and the dash, dot, and underscore if you want to avoid Bash surprises. Avoid using a dash as the first character of a file name, because many Linux commands will treat it as a switch. If your files start with a dot, they'll become hidden files.!!!  
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #Basename of the corpus placed in $mosesdir/corpora_for_training (the default value refers to the 2 files 200000.for_train.en and 200000.for_train.pt, whose basename is 200000.for_train)
-corpusbasename=paraphrase.for_train
+corpusbasename=200000.for_train
 
 #Basename of the file used to build the language model (LM), placed in $mosesdir/corpora_for_training (!!! this is a file in the target language, having $lang2 as its extension; the extension should be omited when filling this parameter !!!)
-lmbasename=paraphrase
+lmbasename=300000
 
 #Basename of the recaser training file, placed in $mosesdir/corpora_for_training (!!! this is a file in the target language, having $lang2 as its extension; the extension should be omited when filling this parameter !!!)
-recaserbasename=paraphrase
+recaserbasename=300000
 
 #Basename of the tuning corpus, placed in $mosesdir/corpora_for_training (the default value refers to the 2 files 200000.for_tuning.en and 200000.for_tuning.pt, whose basename is 200000.for_tuning)
 #For a real corpus, other than the demo corpus, try to use files with 1000-2000 segments
-tuningbasename=paraphrase.for_tuning
+tuningbasename=200000.for_tuning
 
 #Basename of the test set files (used for testing the trained corpus), placed in $mosesdir/corpora_for_training (the default value refers to the 2 files 200000.for_test.en and 200000.for_test.pt, whose basename is 200000.for_test)
 #For a real corpus, other than the demo corpus, try to use files with 1000 segments
-testbasename=paraphrase.for_test
+testbasename=200000.for_test
 #======================================================= 3. TRAINING STEPS ==============================================================================
 #Number of processors of your computer that will be used by MGIZA (if you use all the processors available, the speed of the training will be considerably improved) 
 #!!! To use all the cores available in your computer, leave this parameter empty!!!
