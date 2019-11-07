@@ -1,2 +1,7 @@
 .DS_Store
 para-nmt-5m-processed.txt
+para-nmt-5m-processed-ref.txt
+para-nmt-5m-processed-para.txt
+.vscode/
+phrase-table-filtered-0.6.txt
+phrase-table.paraphrase.for_train.ref-para
