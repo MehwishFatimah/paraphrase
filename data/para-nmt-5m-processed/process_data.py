@@ -7,9 +7,9 @@ import nltk
 
 if __name__ == "__main__":
 
-    with open('test-para-sents.txt', 'r') as f:
-        with open('test-para-words.txt', 'w') as w:
-            with open('test-para-tags.txt', 'w') as t:
+    with open('test-ref-sents.txt', 'r') as f:
+        with open('test-ref-words.txt', 'w') as w:
+            with open('test-ref-tags.txt', 'w') as t:
                 for line in f:
                     tokens = nltk.word_tokenize(line)
                     word_tags = nltk.pos_tag(tokens)
