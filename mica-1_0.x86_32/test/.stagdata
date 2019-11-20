@@ -1,0 +1,12 @@
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Evidence,NN,of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,1,0,0,Evi,nce
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Evidence,NN,of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,0,0,0,of,of
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Evidence,NN,of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,0,0,0,the,the
+BOS,BOS,BOS,BOS,BOS,BOS,Evidence,NN,of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,0,0,0,gro,ing
+BOS,BOS,BOS,BOS,Evidence,NN,of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,_PERIOD_,_PERIOD_,1,0,0,Jap,ese
+BOS,BOS,Evidence,NN,of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,_PERIOD_,_PERIOD_,EOS,EOS,0,0,0,dem,and
+Evidence,NN,of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,0,0,0,for,for
+of,IN,the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,mor,age
+the,DT,growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,sec,tes
+growing,VBG,Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,abo,nds
+Japanese,JJ,demand,NN,for,IN,mortgage,NN,securitites,NNS,abounds,NNS,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,_PE,OD_
+...EOS...

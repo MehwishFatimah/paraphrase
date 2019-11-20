@@ -1,0 +1,3 @@
+
+#Set 0 of weight used by the classifier
+vector wght {  maxindex=0 type="weight" field=0 43544=10.367 2093116=1.8924 2592892=0.556074 3159692=1.88334 }

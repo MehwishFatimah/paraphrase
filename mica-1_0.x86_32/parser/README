@@ -1,0 +1,197 @@
+This file describes very briefly the input, output and options of the
+parser and the script that can be used to launch it.
+
+1 THE PARSER 
+
+INPUT
+
+One sentence per file, one word per line.
+
+format:
+
+"word" (stag [|score|]*)
+
+example:
+
+"Some" (t1 [|0.914548|] t113 [|0.0823905|] t166 [|0.0554113|] )
+"``" (t121 [|0.913772|] t5 [|0.0330623|] )
+"circuit" (t2 [|0.965386|] )
+"breakers" (t3 [|0.923321|] t2 [|0.0307682|] )
+"''" (t122 [|0.533444|] t6 [|0.285331|] t503 [|0.012475|] )
+"installed" (t64 [|0.321686|] t51 [|0.168637|] t50 [|0.0618309|] t81 [|0.018468|] t790 [|0.00545918|] t317 [|0.00543135|] )
+"after" (t74 [|0.50651|] t13 [|0.501241|] t79 [|0.0241198|] tCO [|0.0223474|] )
+"the" (t1 [|0.997915|] )
+"October" (t2 [|0.362544|] t3 [|0.298274|] )
+"1987" (t2 [|0.967132|] t48 [|0.145882|] )
+"crash" (t3 [|0.993595|] )
+"failed" (t301 [|0.148406|] t27 [|0.06651|] t287 [|0.0434774|] t99 [|0.0395025|] t83 [|0.0237739|] t423 [|0.0172887|] t97 [|0.01
+21004|] t23 [|0.00656507|] )
+"their" (t30 [|0.998887|] t42 [|0.0189209|] )
+"first" (t36 [|0.989604|] )
+"test" (t3 [|0.89774|] t142 [|0.134266|] t167 [|0.0210402|] )
+"," (t20 [|0.0813624|] t62 [|0.0675192|] t132 [|0.0623098|] t756 [|0.0250811|] t183 [|0.0248132|] t163 [|0.0155976|] t527 [|0.01
+22129|] t251 [|0.0107972|] )
+"traders" (t3 [|0.933987|] t18 [|0.0631959|] )
+"say" (t368 [|0.9339|] t28 [|0.140926|] t133 [|0.0223441|] t63 [|0.0200248|] t81 [|0.0185197|] )
+"," (t14 [|0.909059|] t110 [|0.01521|] )
+"unable" (t187 [|0.142707|] t46 [|0.0316526|] t270 [|0.016107|] t73 [|0.0144792|] t239 [|0.0140355|] t358 [|0.0125869|] t1032 [|
+0.00996792|] t316 [|0.00925904|] )
+"to" (t31 [|0.983657|] )
+"cool" (t182 [|0.681545|] t68 [|0.108047|] t27 [|0.0448035|] t343 [|0.0312129|] t158 [|0.0233366|] t23 [|0.014589|] t701 [|0.014
+5612|] t781 [|0.0129909|] )
+"the" (t1 [|0.997841|] )
+"selling" (t11 [|0.838992|] )
+"panic" (t3 [|0.982495|] )
+"in" (t13 [|0.576919|] t4 [|0.240646|] tCO [|0.0554617|] t2176 [|0.00958179|] )
+"both" (t1 [|0.940897|] t1841 [|0.0226102|] )
+"stocks" (t3 [|0.942594|] t2177 [|0.033715|] )
+"and" (t17 [|0.873699|] t39 [|0.199382|] )
+"futures" (t18 [|0.807481|] t3 [|0.344934|] )
+"." (t26 [|0.99071|] )
+
+OUTPUT
+
+format:
+
+dependent_position dependent_stag gov_position gov_stag
+
+example:
+
+1 t1 4 t3
+2 t121 3 t2
+3 t2 4 t3
+4 t3 20 t46
+5 t122 4 t3
+6 t64 4 t3
+7 t74 12 t301
+8 t1 11 t3
+9 t2 11 t3
+10 t2 11 t3
+11 t3 12 t301
+12 t301 6 t64
+13 t30 15 t3
+14 t36 15 t3
+15 t3 12 t301
+16 t183 20 t46
+17 t3 18 t368
+18 t368 16 t183
+19 t14 16 t183
+20 t46 20 t46
+21 t31 22 t182
+22 t182 20 t46
+23 t1 25 t3
+24 t11 25 t3
+25 t3 22 t182
+26 t13 22 t182
+27 t1 28 t3
+28 t3 26 t13
+29 t17 28 t3
+30 t18 29 t17
+31 t26 20 t46
+
+options :
+	-pf          outputs the first best analysis
+	-pp -ns      outputs the parse forest
+	-ptn         outputs the number of parses in the forest
+	-u file_name read the configuration file file_name
+	-vto secs    timeout in seconds (time spent by the CPU)
+
+2 THE SCRIPT
+
+It allows to launch the parser on a file contaning several 
+sentences, separated by 
+
+...EOS...
+...EOS...
+
+It launches the executable on each sentence, reads the file produced
+by the parser, adds the words and prints the result on standard output.
+
+INPUT:
+
+Some t1 0.914548 t113 0.0823905 t166 0.0554113 
+`` t121 0.913772 t5 0.0330623 t111 0.00374673 t10 0.00351135 
+circuit t2 0.965386 t3 0.00293375 t351 0.00129732 t18 0.000629112 
+breakers t3 0.923321 t2 0.0307682 t167 0.0136868 t38 0.011 t16 0.00212392 
+'' t122 0.533444 t6 0.285331 t503 0.012475 t176 0.00787302 t669 0.0062126 
+installed t64 0.321686 t51 0.168637 t50 0.0618309 t81 0.018468 t790 0.00545918 
+after t74 0.50651 t13 0.501241 t79 0.0241198 tCO 0.0223474 t86 0.00367141 
+the t1 0.997915 t3 0.000920324 t113 0.000668418 t604 0.000257473 
+October t2 0.362544 t3 0.298274 t65 0.00518995 t142 0.00376376 t38 0.00311101
+1987 t2 0.967132 t48 0.145882 t487 0.00191275 t190 0.00165492 t3297 0.00105677 
+crash t3 0.993595 t485 0.00255434 t37 0.00204644 t420 0.00140631 
+failed t301 0.148406 t27 0.06651 t287 0.0434774 t99 0.0395025 
+their t30 0.998887 t42 0.0189209 t487 0.00225894 t49 0.0014876 
+first t36 0.989604 t43 0.00392002 t1490 0.00202095 t538 0.00181387 
+test t3 0.89774 t142 0.134266 t167 0.0210402 t2 0.0100489 t65 0.0051885 
+, t20 0.0813624 t62 0.0675192 t132 0.0623098 t756 0.0250811 t183 0.0248132 
+traders t3 0.933987 t18 0.0631959 t16 0.00249925 t15 0.00246507 t707 0.00167844 
+say t368 0.9339 t28 0.140926 t133 0.0223441 t63 0.0200248 t81 0.0185197 
+, t14 0.909059 t110 0.01521 t163 0.0132074 t224 0.0108373 t800 0.00524642 
+unable t187 0.142707 t46 0.0316526 t270 0.016107 t73 0.0144792 t239 0.0140355 
+to t31 0.983657 t156 0.0018468 t176 0.000397946 t2136 0.000315265 t771 0.000224719
+cool t182 0.681545 t68 0.108047 t27 0.0448035 t343 0.0312129 t158 0.0233366
+the t1 0.997841 t548 0.00598561 t113 0.00347345 t115 0.000897269 t108 0.000867315
+selling t11 0.838992 t141 0.0040583 t68 0.00394444 t57 0.00363861 t478 0.00355591
+panic t3 0.982495 t38 0.0090609 t65 0.0059094 t539 0.00274559 t221 0.00153159
+in t13 0.576919 t4 0.240646 tCO 0.0554617 t2176 0.00958179 t4201 0.00812975
+both t1 0.940897 t1841 0.0226102 t394 0.00754018 t1855 0.00338367 t677 0.00262459
+stocks t3 0.942594 t2177 0.033715 t2 0.00877049 t56 0.00291616 t159 0.00183847
+and t17 0.873699 t39 0.199382 t58 0.0045232 t456 0.00317305 t275 0.00129797
+futures t18 0.807481 t3 0.344934 t758 0.0069676 t88 0.0021641 t296 0.00154687
+. t26 0.99071 t210 0.00388558 t484 0.00209464 t91 0.00121667 t358 0.000367838
+...EOS...
+
+OUTPUT:
+
+1 Some t1 4 breakers t3
+2 `` t121 3 circuit t2
+3 circuit t2 4 breakers t3
+4 breakers t3 20 unable t46
+5 '' t122 4 breakers t3
+6 installed t64 4 breakers t3
+7 after t74 12 failed t301
+8 the t1 11 crash t3
+9 October t2 11 crash t3
+10 1987 t2 11 crash t3
+11 crash t3 12 failed t301
+12 failed t301 6 installed t64
+13 their t30 15 test t3
+14 first t36 15 test t3
+15 test t3 12 failed t301
+16 , t183 20 unable t46
+17 traders t3 18 say t368
+18 say t368 16 , t183
+19 , t14 16 , t183
+20 unable t46 20 unable t46
+21 to t31 22 cool t182
+22 cool t182 20 unable t46
+23 the t1 25 panic t3
+24 selling t11 25 panic t3
+25 panic t3 22 cool t182
+26 in t13 22 cool t182
+27 both t1 28 stocks t3
+28 stocks t3 26 in t13
+29 and t17 28 stocks t3
+30 futures t18 29 and t17
+31 . t26 20 unable t46
+...EOS...//...EOS...//...EOS...
+...EOS...//...EOS...//...EOS...
+...NEW...//...NEW...//...NEW...
+...NEW...//...NEW...//...NEW...
+
+
+OPTIONS:
+
+There are five important parameters in the script:
+
+my $beam_width = 64; # the scores of the supertags given as input to the parser are greater or equal
+                     # than: highest supertag score / beam_width
+my $nb_max_de_supertags = 8 ; #maximum number of supertags allowed per word
+my $parser = "./d6.0.parser.0.0.out"; #the parser
+my $conf_file = "configuration_file.0"; #name of the configuration file for the parser
+my $timeout = 60; # timeout in seconds
+
+
+
+

@@ -1,0 +1,16 @@
+#!/usr/common/bin/perl
+
+if ($ARGV[0] eq "s") {
+    $eos="...EOS...//...EOS...//...EOS...";
+}
+else {
+    $eos="...EOS...//...EOS...";
+}
+shift;
+
+while (<>) {
+    s/^[ ]*//;
+    s/\n/\n$eos\n/;
+    s/ /\n/g;
+    print;
+}

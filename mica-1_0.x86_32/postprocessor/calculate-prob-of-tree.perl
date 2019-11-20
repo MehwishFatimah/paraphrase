@@ -1,0 +1,302 @@
+
+use strict;
+
+# This script adds info about the derivation of a tree to a file of
+# MICA parses.
+
+
+
+# b l t1676 1 START END 0.000000
+# b r t1676 1 START END 0.000000
+# b l t1676 2 START END 0.000000
+# b r t1676 2 START END 0.000000
+# b l t1676 3 START END 0.000000
+# b r t1676 3 START END -0.305186
+# b r t1676 3 t82 END 0.000000
+# u r t1676 3 t82 -0.471726
+# b r t1676 3 START t82 -0.296913
+# b l t1676 4 START END 0.000000
+# b r t1676 4 START END 0.000000
+# b l t2505 1 START END 0.000000
+
+#my $infile = shift;
+
+my $currentTree = "ERROR";
+my %adjTable = ();
+my %subsTable = ();
+my %rootTable = ();
+
+# Location of various files
+
+
+my $instloc=$ENV{StagParserRoot}; # variable for the location of the parser
+
+
+my $TREEPROPERTIES = "$instloc/postprocessor/d6.clean2.f.str";
+my $ROOTTABLE = "$instloc/postprocessor/d6.clean2.roots.logprob";
+my $PROBTABLE = "$instloc/postprocessor/d6.clean2.bigram-backoff-subst0.an.counts.orprobs";
+
+
+# Read in grammar file and create table that associates, to each pair
+# of a tree and a substitution address in that tree, the dpos number.
+
+# First, read treeproperties into a hashtable.
+
+# Format:
+
+#t2468 AP##1#l# AP##2#l#f AP##2#r#f S##3#l# NP#0#4#l# -NONE-##5#l# -NONE-##5#r# NP#0#4#r# VP##6#l# V##7#l#h V##7#r#h NP#1#8#l#s NP#1#8#r#s PP#2#9#l#s PP#2#9#r#s VP##6#r# S##3#r# AP##1#r# 
+# Format:
+
+# t1481 cat:V dsubcat:NP0_NP1_NP2(P) ssubcat:NP0_NP1_NP2 voice:act comp:n datshift:+ root:S lfront:NP#s#0 rfront:NP#s#2_PP#s#X_NP#s#1 intern:VP adjnodes:S_VP substnodes:PP_Punct
+# t2858 cat:V dsubcat:NP0_NP1 ssubcat:NP1_NP2(P) rel:+ voice:pas_by comp:n particle:- root:VP lfront:nil rfront:RP#c_IN#c_NP#s#0 intern:-NONE-_NP_PP_PRT coanc:out_by modif:NP dir:RIGHT adjnodes:NP_PP_PRT_VP substnodes:nil
+
+
+
+my %subsNodeTable = ();
+
+open(TP, $TREEPROPERTIES) or die "File not found: $TREEPROPERTIES\n";
+#open(TPOUT, ">$TREEPROPERTIES.indextable");
+
+while (<TP>) {
+
+    chomp;
+    my @parts = split;
+    my $tree = shift @parts;
+    foreach my $node (@parts) {
+
+	my @nodeParts = split '\#', $node;
+	if ($nodeParts[4] eq "s") {
+	    my $node = $nodeParts[2];
+	    my $index = $nodeParts[1];
+	    $subsNodeTable{$tree}{$node} = $index;
+#	    print TPOUT "$tree $node: $index\n";
+	}
+    }
+
+}
+
+close TP;
+#close TPOUT;
+
+
+# Now read in root table
+
+open(RT,$ROOTTABLE);
+
+while (<RT>) {
+
+    chomp;
+    my @parts = split;
+    $rootTable{$parts[0]} = $parts[1];
+
+}
+
+close RT;
+
+
+# Record info on null adjunction
+
+my %nullTreeTable = ();
+
+
+open(PT,$PROBTABLE);
+#open(PTOUT,">$PROBTABLE.nullout");
+
+while (<PT>) {
+
+    chomp;
+    my @parts = split;
+    my $tree = $parts[0];
+    my $count = $parts[1];
+    my $adj = $parts[2];
+    my $subs = $parts[3];
+    my $null = $parts[4];
+
+    $adj =~ s/^.*://;
+    my @adjParts = split '\+', $adj;
+    foreach my $adjStat (@adjParts) {
+	my @info = split '~', $adjStat;
+	$adjTable{$tree}{$info[0]} = $info[2];
+#	print PTOUT "$tree $info[0] $info[2]\n";
+    }
+
+    $subs =~ s/^.*://;
+    my @nodes = split '\|', $subs;
+    foreach my $node (@nodes) {
+	$node =~ s/(^.*)=//;
+	my $pstn = $1;
+	my $index = $subsNodeTable{$tree}{$pstn};
+	my @subTrees = split '\+', $node;
+	foreach my $subTree (@subTrees) {
+	    my @info = split '~', $subTree;
+	    $subsTable{$tree}{$index}{$info[0]} = $info[2];
+#	    print "Pstn:$pstn node:$node tree:$tree subtree:$subTree index:$index\n";
+#	    print PTOUT "$tree|$index|$subTree|$info[0]|$info[2]\n";
+	}
+    }
+
+    $null =~ s/^null://;
+    my @nodes = split '\=', $null;
+    foreach my $node (@nodes) {
+#	print PTOUT "$tree $node\n";
+	my @info = split '\~', $node;
+	my $pstn = $info[0];
+	my $nullProb = $info[2];
+	$nullProb =~ s/^nullProb://;
+	if ($nullProb < 0) {
+	    my $nullTrees = $info[3];
+	    $nullTrees =~ s/^nulltrees://;
+#	    print PTOUT "$tree $pstn $nullProb nullTrees:";
+	    my @nullTrees = split '\+', $nullTrees;
+	    $nullTreeTable{$tree}{$pstn}{'prob'} = $nullProb;	
+	    foreach my $nullTree (@nullTrees) {
+		$nullTreeTable{$tree}{$pstn}{'tree'}{$nullTree} = 1;	
+#		print PTOUT "$nullTree ";
+	    }
+#	    print PTOUT "\n";
+	}
+    }
+
+		
+}
+
+
+close PT;
+#close PTOUT;
+
+# Now read in a parsed file and assign probabilities
+
+# Input file format (actually, need Drole as well!)
+
+# ...EOS...//...EOS...//...EOS...
+# ...EOS...//...EOS...//...EOS...
+# ...NEW...//...NEW...//...NEW...
+# ...NEW...//...NEW...//...NEW...
+# 1 In IN 5 fallen VBN t0 t331
+# 2 April NNP 1 In IN t3 t0
+# 3 they PRP 5 fallen VBN t29 t331
+# 4 had VBD 5 fallen VBN t23 t331
+# 5 fallen VBN 5 fallen VBN t331 t331
+# 6 by IN 5 fallen VBN tCO t331
+# 7 the DT 9 amount NN t1 t3
+# 8 same JJ 9 amount NN t36 t3
+# 9 amount NN 5 fallen VBN t3 t331
+# 10 . _PERIOD_ 5 fallen VBN t26 t331
+# ...EOS...//...EOS...//...EOS...
+# ...EOS...//...EOS...//...EOS...
+# ...NEW...//...NEW...//...NEW...
+# ...NEW...//...NEW...//...NEW...
+
+
+
+my $firstEOS = 1;
+my $words = 0;
+my $prob = 0;
+my $firstEOS = 1;
+my %adjNullTable = ();
+my %treeTable = ();
+
+# open(IN,$infile);
+
+while (<>) {
+
+    if (/...NEW.../) {
+	print;
+	next;
+    }
+    chomp;
+    if (/...EOS.../) {
+
+	if ($firstEOS) {
+
+	    # Now add null adjunction probabilities
+
+	    my $nullProb = $prob;
+
+	    for (my $i=1;$i<=$words;$i++) {
+
+		my $thisTree = $treeTable{$i};
+#		print "This tree: $thisTree\n";
+		foreach my $treePstn (keys %{ $nullTreeTable{$thisTree}}) {
+		    # Now check if something was adjoined here
+#		    print "  Tree pstn: $treePstn\n";
+		    my $nullAdjunction = 1;
+		    foreach my $adjTree (keys %{ $nullTreeTable{$thisTree}{$treePstn}{'tree'}}) {
+			if ($adjNullTable{$i}{$adjTree}) {
+			    # something was adjoined here
+			    $nullAdjunction = 0;
+			    last;
+			}
+		    }
+		    if ($nullAdjunction) {
+			# add nullAdj probs now
+			$nullProb += $nullTreeTable{$thisTree}{$treePstn}{'prob'};
+#			print "Null prob added for tree $thisTree pos $treePstn: " . $nullTreeTable{$thisTree}{$treePstn}{'prob'} . "\n";
+
+		    }
+		}
+	    }
+	    
+	    print "$_";
+	    if ($words > 0) {
+		printf " Words: $words Prob: %1.4f  NormProb: %1.4f\n",$nullProb, $nullProb/$words;
+	    }
+	    else {
+		printf " Words: $words Prob: %1.4f  NormProb: %1.4f\n", $nullProb, 0;
+	    }
+
+	    $words = 0;
+	    $prob = 0;
+	    $firstEOS = 0;
+	    %treeTable =();
+	    %adjNullTable = ();
+
+	}
+	else {
+	    print "$_\n";
+	    $firstEOS = 1;
+	}
+    }
+    else {
+	print "$_\n";
+	# Analyze dependency
+	s/\|\|/ /;  # sometimes || is used as separator after the core info
+	my @parts = split;
+	my $depPstn = $parts[0];  # what is this SENTENCE position?
+	my $pstn = $parts[3];  # into which SENTENCE position?
+	my $depTree = $parts[6];  # CHECK THIS INDEX
+	my $tree = $parts[7];     # CHECK THSI INDEX
+	my $drole = getDrole($_);
+	$treeTable{$depPstn} = $depTree;
+	if ($drole eq "adj") {
+	    $prob += $adjTable{$tree}{$depTree};
+	    $adjNullTable{$pstn}{$depTree} = 1;
+#	    print "Added adj prob $tree $depTree " . $adjTable{$tree}{$depTree} . "\n";
+	}
+	elsif ($drole eq "root") {
+	    $prob += $rootTable{$tree};
+#	    print "Added root prob " . $rootTable{$tree} . "\n";
+	}
+	else {
+	    $prob += $subsTable{$tree}{$drole}{$depTree};
+#	    print "Added subs prob " . $subsTable{$tree}{$drole}{$depTree} . "\n";
+	}
+	$words++;
+    }
+}
+
+		
+sub getDrole {
+
+    my $line = shift;
+
+    m/[Dd][Rr]ole[=:](\S*)/;
+    my $role = lc($1);
+    return $role;
+
+
+}
+	    
+#close IN;
+
+

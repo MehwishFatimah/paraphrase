@@ -1,0 +1,192 @@
+
+use strict;
+
+# This script adds grammatical info to the output of the MICA parser.
+# There are two parts: 
+
+# 1. Adding info associated to the word's tree (simple).
+# 2. Adding the deep and surface syntactic roles (more complex).
+
+
+# Sample parser output and input to this script:
+
+# 1 The DT 2 President NNP t1 t3
+# 2 President NNP 3 said VBD t3 t83
+# 3 said VBD 3 said VBD t83 t83
+# 4 something NN 3 said VBD t3 t83
+# 5 to TO 3 said VBD tCO t83
+# 6 the DT 8 minister NN t1 t3
+# 7 prime JJ 8 minister NN t36 t3
+# 8 minister NN 3 said VBD t3 t83
+# 9 . _PERIOD_ 3 said VBD t26 t83
+# ...EOS...//...EOS...//...EOS...
+# ...EOS...//...EOS...//...EOS...
+# ...NEW...//...NEW...//...NEW...
+# ...NEW...//...NEW...//...NEW...
+
+
+# Location of resources:
+
+my $instloc=$ENV{MicaRoot}; # variable for the location of the parser
+
+my $TREEPROPERTIES =
+    "$instloc/postprocessor/d6.clean2.treeproperties";
+
+
+my %treeProps = ();
+
+
+# First, read treeproperties into a hashtable.
+
+# Format:
+
+# t1481 cat:V dsubcat:NP0_NP1_NP2(P) ssubcat:NP0_NP1_NP2 voice:act comp:n datshift:+ root:S lfront:NP#s#0 rfront:NP#s#2_PP#s#X_NP#s#1 intern:VP adjnodes:S_VP substnodes:PP_Punct
+# t2858 cat:V dsubcat:NP0_NP1 ssubcat:NP1_NP2(P) rel:+ voice:pas_by comp:n particle:- root:VP lfront:nil rfront:RP#c_IN#c_NP#s#0 intern:-NONE-_NP_PP_PRT coanc:out_by modif:NP dir:RIGHT adjnodes:NP_PP_PRT_VP substnodes:nil
+
+
+
+open(TP, $TREEPROPERTIES) or die "File not found: $TREEPROPERTIES\n";
+
+while (<TP>) {
+
+    chomp;
+    my @parts = split ' ', $_, 2;
+#    print $parts[0] . "|" . $parts[1]
+    my $DSubcat = $parts[1];
+    $DSubcat =~ s/.* dsubcat:([\S]+)\s.*/$1/;
+    if ($DSubcat ne "nil") {
+	$DSubcat =~ s/\D//g;
+    }
+    my $SSubcat = $parts[1];
+    $SSubcat =~ s/.* ssubcat:([\S]+)\s.*/$1/;
+    if ($SSubcat ne "nil") {
+	$SSubcat =~ s/\D//g;
+    }
+    # Now find list of deep roles in order
+    my $DRolesInOrder = "";
+    my $argsInOrder = $parts[1];
+    $argsInOrder =~ s/.*\slfront:([\S]+)\s.*/$1/;
+    my @argParts = split '_', $argsInOrder;
+    foreach my $part (@argParts) {
+	my @partParts = split '#', $part;
+#	print $part . "--" . $partParts[2];
+	$DRolesInOrder .= $partParts[2];
+    }
+    $argsInOrder = $parts[1];
+    $argsInOrder =~ s/.*\srfront:([\S]+)\s.*/$1/;
+    my @argParts = split '_', $argsInOrder;
+    foreach my $part (@argParts) {
+	my @partParts = split '#', $part;
+#	print $part . "--" . $partParts[2];
+	$DRolesInOrder .= $partParts[2];
+    }
+    # Now map list of deep roles in order to list of surface roles in order 
+    # Idea is that SSubcat list only has realized roles anyway
+
+    my $SRolesInOrder = $DRolesInOrder;
+    my $j=0;
+    for (my $i=0;$i<length($SRolesInOrder);$i++) {
+	if ((substr $SRolesInOrder, $i, 1) ne "X") {
+	    if ($j > length($SSubcat)) {
+#		(substr $SRolesInOrder, $i, 1) = "R";
+	    }
+	    else {
+		(substr $SRolesInOrder, $i, 1) = (substr $SSubcat, $j, 1);
+		$j++;
+	    }
+	}
+
+    }
+
+
+    $treeProps{$parts[0]} = $parts[1] . " DSub:$DSubcat SSub:$SSubcat DRIO:$DRolesInOrder SRIO:$SRolesInOrder";	
+
+
+# print "|" . $parts[0] . "|Gov D/S subcat: $DSubcat, $SSubcat. D/SRole in order: $DRolesInOrder $SRolesInOrder.\n";
+
+}
+
+close(TP);
+
+
+my @DRoles = ();  # record deep roles of dependents of words in sentence
+my @SRoles = ();  # record surface roles of dependents of words in sentence
+
+while (<>) {
+
+    if ((/\.\.\.EOS\.\.\./) || (/^Empty sentence found:/)) {
+	print;
+	next;
+    }
+    if (/\.\.\.NEW\.\.\./) {
+
+	@DRoles = ();
+	@SRoles = ();
+	print;
+	next;
+
+    }
+    
+    chomp;
+    my @parts = split;
+    my $myPos = $parts[0];
+    my $govPos = $parts[3];
+    my $stag = $parts[6];
+    my $govStag = $parts[7];
+
+    if ($DRoles[$govPos] eq "") {  # first mention of this position
+
+	my $DRolesInOrder = $treeProps{$govStag};
+	my $SRolesInOrder = $treeProps{$govStag};
+	my $DSubcat = $treeProps{$govStag};
+	my $SSubcat = $treeProps{$govStag};
+	# DRIO:$DRolesInOrder
+	if ($DRolesInOrder =~ m/.*\DRIO:([\S]+)\s/) {
+	    $DRolesInOrder = $1;
+	}
+	else {
+	    $DRolesInOrder = "";
+	}
+#	print "---->" . $treeProps{$govStag} . "\n";
+#	print "---->DRIO: $DRolesInOrder\n";
+	# DRIO:$DRolesInOrder
+	if ($SRolesInOrder =~ m/.*\SRIO:([\S]+)/) {
+	    $SRolesInOrder = $1;
+	}
+	else {
+	    $SRolesInOrder = "";
+	}
+#	print "---->SRIO: $SRolesInOrder\n";
+	$DRoles[$govPos] = $DRolesInOrder . "EEEEEEEE";
+	$SRoles[$govPos] = $SRolesInOrder . "EEEEEEEE";
+	
+    }
+
+#    print "My pos:$myPos Gov pos:$govPos Droles[govPos]:" . $DRoles[$govPos] . " Sroles[govPos]:" . $SRoles[$govPos] . "\n";
+    
+    print $_;
+    print "||";
+    my $treePropString = $treeProps{$stag};
+    print $treePropString;
+    if ($myPos eq $govPos) {
+	print " DRole:Root SRole:Root ";	
+    }
+    elsif ($stag eq "tCO") {
+	print " DRole:CoHead SRole:CoHead ";	
+    }
+    elsif ($treePropString =~ /modif/) {
+	print " DRole:Adj SRole:Adj ";	
+    }	
+    else {
+	print " DRole:";
+
+	print (substr $DRoles[$govPos], 0, 1);
+	$DRoles[$govPos] = substr $DRoles[$govPos], 1;
+	print " SRole:";
+	print (substr $SRoles[$govPos], 0, 1);
+	$SRoles[$govPos] = substr $SRoles[$govPos], 1;
+    }
+    print "\n";
+
+}
+

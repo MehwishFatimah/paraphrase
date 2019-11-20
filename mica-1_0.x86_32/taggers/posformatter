@@ -1,0 +1,90 @@
+$eos="EOS";
+$bos="BOS";
+$sentend="...EOS...";
+if ($#ARGV<0) {
+print "Usage: $0 contextsize file\n" ;
+exit;
+}
+
+$context=shift;
+while(<>) {
+  chop;
+  s/#/_HASH_/g;
+  s/:/_COLON_/g;
+  s/%/_PERCENTAGE_/g;
+  s/,/_COMMA_/g;
+  s/\./_PERIOD_/g;
+  s/\?/_QMARK_/g;
+  
+  if ($_ =~/$sentend/) {
+    if ($line ne "") {
+      @words=split(' ',$line);
+      for($i=0;$i<=$#words;$i++) {
+	for ($j=$i-$context;$j<=$i+$context;$j++) {
+	  if ($j<0) {
+	    print "$bos,";
+	  }
+	  elsif ($j>$#words) {
+	    print "$eos,";
+	  }
+	  elsif ($j==$i) {
+	      print "$words[$i],";
+	  }	  
+	  elsif ($j<$i) {
+	    print "$words[$j],";
+
+	  }
+	  elsif ($j>$i) {
+	    print "$words[$j],";
+	  }
+	}
+	$orthofeats=GetOrthoFeats($words[$i]);
+	print "$orthofeats\n"
+      }
+      print "$sentend\n";
+      $line="";
+      @w=();
+      @words=();
+      @pos=();
+      @stags=();
+    }
+  }
+  else {
+    $line.= " $_";
+  }
+}
+
+sub GetOrthoFeats {
+    my ($w) = @_;
+    my ($res) = "";
+
+    if ($w =~ /^[A-Z]/) {
+       $res="1,";
+    }   
+    else {
+	$res="0,";
+    }
+    
+    if ($w =~ /^[0-9]/) {
+       $res.="1,";
+    }   
+    else {
+	$res.="0,";
+    }
+    
+    if ($w =~ /\-/) {
+       $res.="1,";
+    }   
+    else {
+	$res.="0,";
+    }
+
+    $l[$c_pref]=
+    $l[$c_suf]=substr($l[$c_lex],-3);
+
+
+    $res.=substr($w,0,3) .",";
+    $res.=substr($w,-3);
+
+    return $res;
+}

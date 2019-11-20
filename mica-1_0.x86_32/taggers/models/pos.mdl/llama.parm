@@ -1,0 +1,81 @@
+# Kernel with LOGISTIC learner
+kernel k1 {
+        learner=logistic
+        parms=logistic1
+       fields={field1}
+        weights={1}
+}
+
+
+
+# Specifies where to find the data, 
+field field1 { 
+        file=%s.dat.gz
+        type=bsparse
+}
+#use logistic
+Logistic logistic1 { 
+        pretrain=true
+        display-niter=1000
+
+#this set of options decides when to stop
+       stop-dloss=1e-8
+        stop-niter=400000
+        cum-loss-factor=1
+
+#optimization of learning speed with working set algorithm
+        wset-size=25
+        wset-cycle-niter=100
+
+#optimization of classification performance
+        beta=0.5
+
+}
+
+classifier NNP {  kernels={k1} vecfile={NNP_1.parm} trivial=false weights={1} sigmoid=1 bias=2.908774853 binfile="NNP_1.bin" }
+classifier VBN {  kernels={k1} vecfile={VBN_1.parm} trivial=false weights={1} sigmoid=1 bias=-4.983291626 binfile="VBN_1.bin" }
+classifier `` {  kernels={k1} vecfile={``_1.parm} trivial=false weights={1} sigmoid=1 bias=-11.35088825 binfile="" }
+classifier RBR {  kernels={k1} vecfile={RBR_1.parm} trivial=false weights={1} sigmoid=1 bias=-8.781130791 binfile="RBR_1.bin" }
+classifier FW {  kernels={k1} vecfile={FW_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.424362183 binfile="FW_1.bin" }
+classifier VBP {  kernels={k1} vecfile={VBP_1.parm} trivial=false weights={1} sigmoid=1 bias=-3.073331118 binfile="VBP_1.bin" }
+classifier '' {  kernels={k1} vecfile={''_1.parm} trivial=false weights={1} sigmoid=1 bias=-10.88502693 binfile="" }
+classifier NNPS {  kernels={k1} vecfile={NNPS_1.parm} trivial=false weights={1} sigmoid=1 bias=-4.943816185 binfile="NNPS_1.bin" }
+classifier RBS {  kernels={k1} vecfile={RBS_1.parm} trivial=false weights={1} sigmoid=1 bias=-10.68103981 binfile="RBS_1.bin" }
+classifier _HASH_ {  kernels={k1} vecfile={_HASH__1.parm} trivial=false weights={1} sigmoid=1 bias=-13.63553715 binfile="" }
+classifier IN {  kernels={k1} vecfile={IN_1.parm} trivial=false weights={1} sigmoid=1 bias=-5.420319557 binfile="IN_1.bin" }
+classifier NNS {  kernels={k1} vecfile={NNS_1.parm} trivial=false weights={1} sigmoid=1 bias=-2.693012953 binfile="NNS_1.bin" }
+classifier VBZ {  kernels={k1} vecfile={VBZ_1.parm} trivial=false weights={1} sigmoid=1 bias=-4.631722927 binfile="VBZ_1.bin" }
+classifier $ {  kernels={k1} vecfile={$_1.parm} trivial=false weights={1} sigmoid=1 bias=-11.02515888 binfile="" }
+classifier RP {  kernels={k1} vecfile={RP_1.parm} trivial=false weights={1} sigmoid=1 bias=-7.517541409 binfile="RP_1.bin" }
+classifier JJ {  kernels={k1} vecfile={JJ_1.parm} trivial=false weights={1} sigmoid=1 bias=-2.443160295 binfile="JJ_1.bin" }
+classifier WDT {  kernels={k1} vecfile={WDT_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.22461319 binfile="WDT_1.bin" }
+classifier ADV {  kernels={k1} vecfile={ADV_1.parm} trivial=false weights={1} sigmoid=1 bias=-7.608691216 binfile="ADV_1.bin" }
+classifier -RRB- {  kernels={k1} vecfile={-RRB-_1.parm} trivial=false weights={1} sigmoid=1 bias=-8.125664711 binfile="" }
+classifier PDT {  kernels={k1} vecfile={PDT_1.parm} trivial=false weights={1} sigmoid=1 bias=-10.47103596 binfile="PDT_1.bin" }
+classifier _PERIOD_ {  kernels={k1} vecfile={_PERIOD__1.parm} trivial=false weights={1} sigmoid=1 bias=-10.16166401 binfile="" }
+classifier CC {  kernels={k1} vecfile={CC_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.313682556 binfile="CC_1.bin" }
+classifier JJR {  kernels={k1} vecfile={JJR_1.parm} trivial=false weights={1} sigmoid=1 bias=-7.96461153 binfile="JJR_1.bin" }
+classifier WP {  kernels={k1} vecfile={WP_1.parm} trivial=false weights={1} sigmoid=1 bias=-11.22411251 binfile="" }
+classifier SYM {  kernels={k1} vecfile={SYM_1.parm} trivial=false weights={1} sigmoid=1 bias=-12.45640278 binfile="" }
+classifier CD {  kernels={k1} vecfile={CD_1.parm} trivial=false weights={1} sigmoid=1 bias=-8.712528229 binfile="CD_1.bin" }
+classifier TO {  kernels={k1} vecfile={TO_1.parm} trivial=false weights={1} sigmoid=1 bias=-10.76133728 binfile="" }
+classifier POS {  kernels={k1} vecfile={POS_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.17300415 binfile="POS_1.bin" }
+classifier JJS {  kernels={k1} vecfile={JJS_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.611290932 binfile="JJS_1.bin" }
+classifier WP$ {  kernels={k1} vecfile={WP$_1.parm} trivial=false weights={1} sigmoid=1 bias=-13.53081608 binfile="" }
+classifier PRP {  kernels={k1} vecfile={PRP_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.467382431 binfile="PRP_1.bin" }
+classifier _COLON_ {  kernels={k1} vecfile={_COLON__1.parm} trivial=false weights={1} sigmoid=1 bias=-11.25481415 binfile="" }
+classifier WRB {  kernels={k1} vecfile={WRB_1.parm} trivial=false weights={1} sigmoid=1 bias=-11.21434498 binfile="" }
+classifier -LRB- {  kernels={k1} vecfile={-LRB-_1.parm} trivial=false weights={1} sigmoid=1 bias=-8.150839806 binfile="" }
+classifier UH {  kernels={k1} vecfile={UH_1.parm} trivial=false weights={1} sigmoid=1 bias=-11.28073883 binfile="" }
+classifier _COMMA_ {  kernels={k1} vecfile={_COMMA__1.parm} trivial=false weights={1} sigmoid=1 bias=-10.03718185 binfile="" }
+classifier VB {  kernels={k1} vecfile={VB_1.parm} trivial=false weights={1} sigmoid=1 bias=-3.575769186 binfile="VB_1.bin" }
+classifier PRP$ {  kernels={k1} vecfile={PRP$_1.parm} trivial=false weights={1} sigmoid=1 bias=-10.19645214 binfile="PRP$_1.bin" }
+classifier LS {  kernels={k1} vecfile={LS_1.parm} trivial=false weights={1} sigmoid=1 bias=-11.56813431 binfile="" }
+classifier DT {  kernels={k1} vecfile={DT_1.parm} trivial=false weights={1} sigmoid=1 bias=-7.825840473 binfile="DT_1.bin" }
+classifier VBD {  kernels={k1} vecfile={VBD_1.parm} trivial=false weights={1} sigmoid=1 bias=-3.666007996 binfile="VBD_1.bin" }
+classifier MD {  kernels={k1} vecfile={MD_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.838668823 binfile="MD_1.bin" }
+classifier PU {  kernels={k1} vecfile={PU_1.parm} trivial=false weights={1} sigmoid=1 bias=-9.886427879 binfile="" }
+classifier NN {  kernels={k1} vecfile={NN_1.parm} trivial=false weights={1} sigmoid=1 bias=0.373103112 binfile="NN_1.bin" }
+classifier RB {  kernels={k1} vecfile={RB_1.parm} trivial=false weights={1} sigmoid=1 bias=-4.740787506 binfile="RB_1.bin" }
+classifier VBG {  kernels={k1} vecfile={VBG_1.parm} trivial=false weights={1} sigmoid=1 bias=-8.519376755 binfile="VBG_1.bin" }
+classifier EX {  kernels={k1} vecfile={EX_1.parm} trivial=false weights={1} sigmoid=1 bias=-11.09780788 binfile="" }

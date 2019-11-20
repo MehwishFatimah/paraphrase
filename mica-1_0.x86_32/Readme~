@@ -1,0 +1,129 @@
+Release 1.0 -- May 14, 2009
+
+This directory contains code to run Postagger, Supertagger and a parser on
+English.  It also has models for the Postagger and Supertagger built from
+WSJ using a Maximum Entropy training package from AT&T (not included in
+this release).
+
+To use the package:
+
+a. Set the environment variable MicaRoot to the location of 
+installation (directory for this Readme file).
+
+b. Run the parser on the input file as follows:
+
+   perl $MicaRoot/mica.perl -TSPR -i <input-file>	
+
+The output goes to stdout. There are four important options to the
+parser (beyond -i):
+
+-T tokenizes the input
+-S runs the tagger and supertagger
+-P runs the parser
+-R runs a post processor
+
+Option -h outputs a minimalist help message
+
+The script is, unfortunately, brittle if it encounters a blank line in
+the middle of the text, so take care to remove such lines first.
+There needs to be exactly one blank line at the end of the file.
+
+------------------------------------------------------------------------------
+Input Output formats
+------------------------------------------------------------------------------
+
+1) input of the tokenizer:
+
+  John saw a man with a telescope.
+
+2) input of the tagger-supertagger
+
+  John saw a man with a telescope .
+
+3) input of the parser
+
+  ##SDAG BEGIN /* sent_id=1 length=8 trans_nb=15 max_lexical_ambiguity=30 */
+  "John NNP" (t3 [|0.994873|] )
+  "saw VBD" (t27 [|0.963659|] t83 [|0.0593242|] t28 [|0.0235152|] t81 [|0.0033786|] t23 [|0.00307722|] )
+  "a DT" (t1 [|0.999214|] )
+  "man NN" (t3 [|0.984086|] t167 [|0.0157787|] )
+  "with IN" (t4 [|0.853727|] t13 [|0.142935|] tCO [|0.0292577|] )
+  "a DT" (t1 [|0.999118|] )
+  "telescope NN" (t3 [|0.989335|] )
+  ". _PERIOD_" (t26 [|0.997554|] )
+  ##SDAG END
+
+4) input of the post processor
+
+  1 John NNP 2 saw VBD t3 t27 2
+  2 saw VBD 2 saw VBD t27 t27 0
+  3 a DT 4 man NN t1 t3 1
+  4 man NN 2 saw VBD t3 t27 7
+  5 with IN 4 man NN t4 t3 5
+  6 a DT 7 telescope NN t1 t3 1
+  7 telescope NN 5 with IN t3 t4 5
+  8 . _PERIOD_ 2 saw VBD t26 t27 9
+  # lp=-15.781420
+  ...EOS...//...EOS...//...EOS...
+  ...EOS...//...EOS...//...EOS...
+  1 John NNP 2 saw VBD t3 t27 2
+  2 saw VBD 2 saw VBD t27 t27 0
+  3 a DT 4 man NN t1 t3 1
+  4 man NN 2 saw VBD t3 t27 7
+  5 with IN 2 saw VBD t13 t27 8
+  6 a DT 7 telescope NN t1 t3 1
+  7 telescope NN 5 with IN t3 t13 5
+  8 . _PERIOD_ 2 saw VBD t26 t27 9
+  # lp=-93.476844
+  ...EOS...//...EOS...//...EOS...
+  ...EOS...//...EOS...//...EOS...
+  ...NEW...//...NEW...//...NEW...
+  ...NEW...//...NEW...//...NEW...
+
+
+  Some explanations
+  The line:
+    1 John NNP 2 saw VBD t3 t27 2
+  reads as follows:
+  
+  1    is the position of the dependent
+  John is the dependent
+  NNP  is the POS tag of the dependent
+  2    is the position of the governor
+  VBD  is the POS tag of the governor
+  t3   is the supertag of the dependent
+  t27  is the supertag of the governor
+  2    is the address of the governor supertag node at which the attachment of the
+       dependent supertag took place
+
+5) output of the post processor
+  
+  1 John NNP 2 saw VBD t3 t27 2||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:0 SRole:0
+  2 saw VBD 2 saw VBD t27 t27 0||cat:V dsubcat:NP0_NP1 ssubcat:NP0_NP1 voice:act comp:n root:S lfront:NP#s#0 rfront:NP#s#1 intern:VP adjnodes:S_VP substnodes:nil DSub:01 SSub:01 DRIO:01 SRIO:01 DRole:Root SRole:Root
+  3 a DT 4 man NN t1 t3 1||cat:D dsubcat:nil ssubcat:nil  comp:n root:D lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj
+  4 man NN 2 saw VBD t3 t27 7||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:1 SRole:1
+  5 with IN 4 man NN t4 t3 5||cat:IN dsubcat:NP1 ssubcat:NP1 pred:- comp:n root:PP lfront:nil rfront:NP#s#1 intern:nil modif:NP dir:RIGHT adjnodes:NP_PP substnodes:nil appo:+ DSub:1 SSub:1 DRIO:1 SRIO:1 DRole:Adj SRole:Adj
+  6 a DT 7 telescope NN t1 t3 1||cat:D dsubcat:nil ssubcat:nil  comp:n root:D lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj
+  7 telescope NN 5 with IN t3 t4 5||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:1 SRole:1
+  8 . _PERIOD_ 2 saw VBD t26 t27 9||cat:. dsubcat:nil ssubcat:nil  comp:n root:. lfront:nil rfront:nil intern:nil modif:S dir:RIGHT adjnodes:S substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj
+  # lp=-15.781420
+  ...EOS...//...EOS...//...EOS...
+  ...EOS...//...EOS...//...EOS...
+  1 John NNP 2 saw VBD t3 t27 2||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:E SRole:E
+  2 saw VBD 2 saw VBD t27 t27 0||cat:V dsubcat:NP0_NP1 ssubcat:NP0_NP1 voice:act comp:n root:S lfront:NP#s#0 rfront:NP#s#1 intern:VP adjnodes:S_VP substnodes:nil DSub:01 SSub:01 DRIO:01 SRIO:01 DRole:Root SRole:Root
+  3 a DT 4 man NN t1 t3 1||cat:D dsubcat:nil ssubcat:nil  comp:n root:D lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj
+  4 man NN 2 saw VBD t3 t27 7||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:E SRole:E
+  5 with IN 2 saw VBD t13 t27 8||cat:IN dsubcat:NP1 ssubcat:NP1 pred:- comp:n root:PP lfront:nil rfront:NP#s#1 intern:nil modif:VP dir:RIGHT adjnodes:PP_VP substnodes:nil DSub:1 SSub:1 DRIO:1 SRIO:1 DRole:Adj SRole:Adj
+  6 a DT 7 telescope NN t1 t3 1||cat:D dsubcat:nil ssubcat:nil  comp:n root:D lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj
+  7 telescope NN 5 with IN t3 t13 5||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:E SRole:E
+  8 . _PERIOD_ 2 saw VBD t26 t27 9||cat:. dsubcat:nil ssubcat:nil  comp:n root:. lfront:nil rfront:nil intern:nil modif:S dir:RIGHT adjnodes:S substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj
+  # lp=-93.476844
+  ...EOS...//...EOS...//...EOS...
+  ...EOS...//...EOS...//...EOS...
+  ...NEW...//...NEW...//...NEW...
+  ...NEW...//...NEW...//...NEW...
+
+
+------------------------------------------------------------------------------
+Please send all questions, bug reports, and comments to (mica@lif.univ-mrs.fr).
+

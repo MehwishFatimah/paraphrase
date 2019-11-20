@@ -1,0 +1,16 @@
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Time,NNP,flies,VBZ,like,IN,an,DT,arrow,NN,_PERIOD_,_PERIOD_,EOS,EOS,1,0,0,Tim,ime
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Time,NNP,flies,VBZ,like,IN,an,DT,arrow,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,0,0,0,fli,ies
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Time,NNP,flies,VBZ,like,IN,an,DT,arrow,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,lik,ike
+BOS,BOS,BOS,BOS,BOS,BOS,Time,NNP,flies,VBZ,like,IN,an,DT,arrow,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,an,an
+BOS,BOS,BOS,BOS,Time,NNP,flies,VBZ,like,IN,an,DT,arrow,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,arr,row
+BOS,BOS,Time,NNP,flies,VBZ,like,IN,an,DT,arrow,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,_PE,OD_
+...EOS...
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Bill,NNP,saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,1,0,0,Bil,ill
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Bill,NNP,saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,_PERIOD_,_PERIOD_,0,0,0,saw,saw
+BOS,BOS,BOS,BOS,BOS,BOS,BOS,BOS,Bill,NNP,saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,_PERIOD_,_PERIOD_,EOS,EOS,0,0,0,the,the
+BOS,BOS,BOS,BOS,BOS,BOS,Bill,NNP,saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,0,0,0,man,man
+BOS,BOS,BOS,BOS,Bill,NNP,saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,wit,ith
+BOS,BOS,Bill,NNP,saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,the,the
+Bill,NNP,saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,tel,ope
+saw,VBD,the,DT,man,NN,with,IN,the,DT,telescope,NN,_PERIOD_,_PERIOD_,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,EOS,0,0,0,_PE,OD_
+...EOS...

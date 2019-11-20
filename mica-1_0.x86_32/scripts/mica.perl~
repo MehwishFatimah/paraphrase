@@ -1,0 +1,145 @@
+
+use strict;
+use Getopt::Std;
+
+#getopts('TSPRhpg:c:n:b:s:f:i:');
+getopts('TSPRhpn:b:s:f:i:');
+
+our $opt_h;
+#our $opt_g;
+#our $opt_c;
+our $opt_n;
+our $opt_b;
+our $opt_s;
+our $opt_f;
+our $opt_i;
+our $opt_p;
+
+our $opt_T;
+our $opt_S;
+our $opt_P;
+our $opt_R;
+
+
+if ($opt_h) {
+        print "$0 - run the mica suite on an input file\n";
+        print "  -i <string>   set the input file\n";
+        print "  -T            run the tokenizer\n";
+        print "  -S            run the supertagger\n";
+        print "  -P            run the parser\n";
+        print "  -R            run the post processor\n";
+        print "  -p            print parameter values\n";
+        print "  -h            print this message\n";
+ #       print "  -g <integer>  set the ngram parameter\n";
+ #       print "  -c <integer>  set the context parameter\n";
+        print "  -n <integer>  output the n best parses\n";
+        print "  -b <float>    set the beam width\n";
+        print "  -s <float>    set the scale factor\n";
+        print "  -f <string>   set the fudge factor\n";
+        print "\n";
+	exit;
+}
+
+#Default values
+
+#my $ngram=3;
+#my $context=6;
+my $nbest=1;
+my $BeamWidth=320;
+my $ScaleFactor=60;
+my $FudgeFactor=100;
+my $file;
+my $show_parameters = 0;
+my $run_tokenizer = 0;
+my $run_supertagger = 0;
+my $run_parser = 0;
+my $run_post_processor = 0;
+
+if ($opt_p){
+    $show_parameters = 1;
+}
+if ($opt_T){
+    $run_tokenizer = 1;
+}
+if ($opt_S){
+    $run_supertagger = 1;
+}
+if ($opt_P){
+    $run_parser = 1;
+}
+if ($opt_R){
+    $run_post_processor = 1;
+}
+#if ($opt_g){
+#    $ngram = $opt_g;
+#}
+#if ($opt_c){
+#    $context = $opt_c;
+#}
+if ($opt_n){
+    $nbest = $opt_n;
+}
+if ($opt_b){
+    $BeamWidth = $opt_b;
+}
+if ($opt_s){
+    $ScaleFactor = $opt_s;
+}
+if ($opt_f){
+    $FudgeFactor = $opt_f;
+}
+if ($opt_i){
+    $file = $opt_i;
+}
+
+
+if($show_parameters){
+#print STDERR "ngram \t\t\t = $ngram\n";
+#print STDERR "context \t\t = $context\n";
+print STDERR "nbest \t\t\t = $nbest\n";
+print STDERR "beam width \t\t = $BeamWidth\n";
+print STDERR "scale factor \t\t = $ScaleFactor\n";
+print STDERR "fudge factor \t\t = $FudgeFactor\n";
+print STDERR "input file \t\t = $file\n";
+print STDERR "run tokenizer \t\t = $run_tokenizer\n";
+print STDERR "run supertagger \t = $run_supertagger\n";
+print STDERR "run parser \t\t = $run_parser\n";
+print STDERR "run post processor \t = $run_post_processor\n";
+}
+
+
+my $MicaRoot = $ENV{MicaRoot};
+
+my $SuperTagger   = "$MicaRoot/taggers/SuperTagger.sh";
+my $Parser        = "$MicaRoot/parser/mica_parser-1_0.x86_32";
+my $StagBeamer    = "$MicaRoot/scripts/stag_beamer.perl";
+my $Postprocessor = "$MicaRoot/postprocessor/add-tree-info.perl";
+my $Tokenizer     = "$MicaRoot/tokenizer/divide-punct2.perl";
+
+my $tokenize_cmd       = "| perl $Tokenizer";
+my $stagger_cmd        = " | $SuperTagger >& /dev/null ;";
+my $format_cmd         = "sed -e 's/:/ /g' -e 's/\\///g'  -e 's/_1//g'  .stagoutput | paste -d' ' .staginput  - ";
+my $beamer_cmd         = " | perl $StagBeamer $BeamWidth $ScaleFactor";
+my $parser_cmd         = " | $Parser -ff $FudgeFactor -sdag -n $nbest -m nu";
+my $post_processor_cmd = "| perl $Postprocessor";
+ 
+my $cmd = "cat " . $file;
+
+if($run_tokenizer){
+    $cmd = $cmd . $tokenize_cmd;
+}
+if($run_supertagger){
+    $cmd = $cmd . $stagger_cmd . $format_cmd . $beamer_cmd;
+}
+if($run_parser){
+    $cmd = $cmd . $parser_cmd;
+}
+if($run_post_processor){
+    $cmd = $cmd . $post_processor_cmd;
+}
+
+#print "$cmd\n";
+
+system($cmd);
+
+

@@ -1,0 +1,8 @@
+John//NNP
+gave//VBD
+an//DT
+apple//NN
+to//TO
+Mary//NNP
+.//_PERIOD_
+...EOS...//...EOS...//...EOS...

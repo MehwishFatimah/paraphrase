@@ -1,0 +1,19 @@
+No classifiers: will look for classes in label files
+Using old stump range
+1 shared data
+no global support vectors
+Building inverted index for 1 fields
+Creating a transpose table with 1437948 columns and 47 depth
+NNP_1 VBN_1 ``_1 RBR_1 FW_1 VBP_1 ''_1 NNPS_1 RBS_1 _HASH__1 IN_1 NNS_1 VBZ_1 $_1 RP_1 JJ_1 WDT_1 ADV_1 -RRB-_1 PDT_1 _PERIOD__1 CC_1 JJR_1 WP_1 SYM_1 CD_1 TO_1 POS_1 JJS_1 WP$_1 PRP_1 _COLON__1 WRB_1 -LRB-_1 UH_1 _COMMA__1 VB_1 PRP$_1 LS_1 DT_1 VBD_1 MD_1 PU_1 NN_1 RB_1 VBG_1 EX_1 
+Data 0: 47 classifiers 
+********** LOADED 47 256 models
+
+Loading labels among [NNP_1 VBN_1 ``_1 RBR_1 FW_1 VBP_1 ''_1 NNPS_1 RBS_1 _HASH__1 IN_1 NNS_1 VBZ_1 $_1 RP_1 JJ_1 WDT_1 ADV_1 -RRB-_1 PDT_1 _PERIOD__1 CC_1 JJR_1 WP_1 SYM_1 CD_1 TO_1 POS_1 JJS_1 WP$_1 PRP_1 _COLON__1 WRB_1 -LRB-_1 UH_1 _COMMA__1 VB_1 PRP$_1 LS_1 DT_1 VBD_1 MD_1 PU_1 NN_1 RB_1 VBG_1 EX_1 ]
+Loaded 53153 labels with and average of 0.999906 categories among 47 from Ascii file test.lbl.gz
+
+**** Hamming error=0.13782
+
+**** TCER=1674/53153 3.15
+
+**** nparms= 124735
+3.15
