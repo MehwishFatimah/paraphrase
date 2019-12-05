@@ -26,7 +26,7 @@ EOS_token = 1
 SOS_token = 0
 EOS_token = 1
 
-MAX_LENGTH = 10
+MAX_LENGTH = 20
 
 
 class Lang:
@@ -52,7 +52,8 @@ class Lang:
 
 def filterPair(p):
     return len(p[0].split(' ')) < MAX_LENGTH and \
-        len(p[1].split(' ')) < MAX_LENGTH 
+        len(p[1].split(' ')) < MAX_LENGTH and \
+            len(p[2].split(' ')) < MAX_LENGTH
 
 
 def filterPairs(pairs):
@@ -83,8 +84,10 @@ def readLangs(lang1, lang2, reverse=False):
     para_lines = open('../data/train-100000/train-para-words.txt', encoding='utf-8').\
         read().strip().split('\n')
 
+    tags = open('../data/train-100000/train-para-supertags.txt', encoding='utf-8').read().strip().split('\n')
+
     # Split every line into pairs and normalize
-    pairs = zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines])
+    pairs = list(zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines], tags))
 
     # Reverse pairs, make Lang instances
     if reverse:
@@ -95,10 +98,12 @@ def readLangs(lang1, lang2, reverse=False):
         input_lang = Lang(lang1)
         output_lang = Lang(lang2)
 
-    return input_lang, output_lang, pairs
+    supertag_lang = Lang('supertags')
+
+    return input_lang, output_lang, supertag_lang, pairs
 
 def prepareData(lang1, lang2, reverse=False):
-    input_lang, output_lang, pairs = readLangs(lang1, lang2, reverse)
+    input_lang, output_lang, supertag_lang, pairs = readLangs(lang1, lang2, reverse)
     print("Read %s sentence pairs" % len(pairs))
     pairs = filterPairs(pairs)
     print("Trimmed to %s sentence pairs" % len(pairs))
@@ -106,10 +111,13 @@ def prepareData(lang1, lang2, reverse=False):
     for pair in pairs:
         input_lang.addSentence(pair[0])
         output_lang.addSentence(pair[1])
+        supertag_lang.addSentence(pair[2])
     print("Counted words:")
     print(input_lang.name, input_lang.n_words)
     print(output_lang.name, output_lang.n_words)
-    return input_lang, output_lang, pairs
+    print(supertag_lang.name, supertag_lang.n_words)
+    return input_lang, output_lang, supertag_lang, pairs
+
 
 
 class EncoderRNN(nn.Module):
@@ -129,27 +137,31 @@ class EncoderRNN(nn.Module):
     def initHidden(self):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
+# modified BiLSTM from:
+# https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/bidirectional_recurrent_neural_network/main.py
+class BiLSTM(nn.Module):
+    def __init__(self, input_size, hidden_size):
+        super(BiLSTM, self).__init__()
+        self.hidden_size = hidden_size
+        
+        self.embedding = nn.Embedding(input_size, hidden_size)
+        self.lstm = nn.LSTM(hidden_size, hidden_size, batch_first=True, bidirectional=True)
+    
+    def forward(self, input, h0, c0):
+        
+        # embed
+        embedded = self.embedding(input).view(1,1,-1)
+        output = embedded
+        # Forward propagate LSTM
+        output, (h0, c0) = self.lstm(embedded, (h0, c0))
+        
+        return output, (h0,c0)
 
-# class DecoderRNN(nn.Module):
-#     def __init__(self, hidden_size, output_size):
-#         super(DecoderRNN, self).__init__()
-#         self.hidden_size = hidden_size
+    def initHidden(self):
+        # print('init hidden with dim', torch.zeros(2, 1, self.hidden_size, device=device).shape)
+        return torch.zeros(2, 1, self.hidden_size, device=device), torch.zeros(2, 1, self.hidden_size, device=device)
 
-#         self.embedding = nn.Embedding(output_size, hidden_size)
-#         self.gru = nn.GRU(hidden_size, hidden_size)
-#         self.out = nn.Linear(hidden_size, output_size)
-#         self.softmax = nn.LogSoftmax(dim=1)
-
-#     def forward(self, input, hidden):
-#         output = self.embedding(input).view(1, 1, -1)
-#         output = F.relu(output)
-#         output, hidden = self.gru(output, hidden)
-#         output = self.softmax(self.out(output[0]))
-#         return output, hidden
-
-#     def initHidden(self):
-#         return torch.zeros(1, 1, self.hidden_size, device=device)
-
+    
 
 class AttnDecoderRNN(nn.Module):
     def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH):
@@ -163,15 +175,15 @@ class AttnDecoderRNN(nn.Module):
         self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
         self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
         self.dropout = nn.Dropout(self.dropout_p)
-        self.gru = nn.GRU(self.hidden_size, self.hidden_size)
-        self.out = nn.Linear(self.hidden_size, self.output_size)
+        self.gru = nn.GRU(self.hidden_size*3, self.hidden_size*3)
+        self.out = nn.Linear(self.hidden_size*3, self.output_size)
 
     def forward(self, input, hidden, encoder_outputs):
         embedded = self.embedding(input).view(1, 1, -1)
         embedded = self.dropout(embedded)
 
         attn_weights = F.softmax(
-            self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
+            self.attn(torch.cat((embedded[0], hidden[0][:,:self.hidden_size]), 1)), dim=1)
         attn_applied = torch.bmm(attn_weights.unsqueeze(0),
                                  encoder_outputs.unsqueeze(0))
 
@@ -179,6 +191,7 @@ class AttnDecoderRNN(nn.Module):
         output = self.attn_combine(output).unsqueeze(0)
 
         output = F.relu(output)
+        output = torch.cat((output, hidden[:,:,self.hidden_size:]),2)
         output, hidden = self.gru(output, hidden)
 
         output = F.log_softmax(self.out(output[0]), dim=1)
@@ -201,22 +214,24 @@ def tensorFromSentence(lang, sentence):
 def tensorsFromPair(pair):
     input_tensor = tensorFromSentence(input_lang, pair[0])
     target_tensor = tensorFromSentence(output_lang, pair[1])
-    return (input_tensor, target_tensor)
+    supertag_tensor = tensorFromSentence(supertag_lang, pair[2])
+    return (input_tensor, target_tensor, supertag_tensor)
 
 
-teacher_forcing_ratio = 0.5
-
-
-def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, max_length=MAX_LENGTH):
+def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encoder, decoder, encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, criterion, max_length=MAX_LENGTH):
     encoder_hidden = encoder.initHidden()
+    supertag_hidden, c0 = supertag_encoder.initHidden()
 
     encoder_optimizer.zero_grad()
+    supertag_encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
 
     input_length = input_tensor.size(0)
     target_length = target_tensor.size(0)
+    supertag_length = supertag_tensor.size(0)
 
     encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
+    supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
 
     loss = 0
 
@@ -225,10 +240,17 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
             input_tensor[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0, 0]
 
+    for ei in range(supertag_length):
+        supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
+        supertag_enc_outputs[ei] = supertag_output[0,0]
+
+
+    supertag_output = torch.cat((supertag_enc_outputs[0][supertag_encoder.hidden_size:], supertag_enc_outputs[-1][:supertag_encoder.hidden_size]))
+
     decoder_input = torch.tensor([[SOS_token]], device=device)
 
-    decoder_hidden = encoder_hidden
-
+    decoder_hidden = torch.cat((encoder_hidden, supertag_output.view(1,1,-1)), dim=2).view(1,1,-1)
+    
     use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
     if use_teacher_forcing:
@@ -271,7 +293,7 @@ def timeSince(since, percent):
     rs = es - s
     return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
 
-def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
+def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -279,6 +301,8 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
 
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
+    supertag_encoder_optimizer = optim.SGD(supertag_encoder.parameters(), lr=learning_rate)
+
     training_pairs = [tensorsFromPair(random.choice(pairs))
                       for i in range(n_iters)]
     criterion = nn.NLLLoss()
@@ -287,9 +311,10 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
         training_pair = training_pairs[iter - 1]
         input_tensor = training_pair[0]
         target_tensor = training_pair[1]
+        supertag_tensor = training_pair[2]
 
-        loss = train(input_tensor, target_tensor, encoder,
-                     decoder, encoder_optimizer, decoder_optimizer, criterion)
+        loss = train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encoder,
+                     decoder, encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, criterion)
         print_loss_total += loss
         plot_loss_total += loss
 
@@ -314,22 +339,35 @@ def showPlot(points):
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
 
-def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
+def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, max_length=MAX_LENGTH):
     with torch.no_grad():
         input_tensor = tensorFromSentence(input_lang, sentence)
+        supertag_tensor = tensorFromSentence(supertag_lang, supertags)
+
         input_length = input_tensor.size()[0]
+        supertag_length = supertag_tensor.size()[0]
+
         encoder_hidden = encoder.initHidden()
+        supertag_hidden, c0 = supertag_encoder.initHidden()
+
 
         encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
+        supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
 
         for ei in range(input_length):
             encoder_output, encoder_hidden = encoder(input_tensor[ei],
                                                      encoder_hidden)
             encoder_outputs[ei] += encoder_output[0, 0]
 
+        for ei in range(supertag_length):
+            supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
+            supertag_enc_outputs[ei] = supertag_output[0,0]
+
         decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
-        decoder_hidden = encoder_hidden
+        # decoder_hidden = encoder_hidden
+        decoder_hidden = torch.cat((encoder_hidden, supertag_output.view(1,1,-1)), dim=2).view(1,1,-1)
+
 
         decoded_words = []
         decoder_attentions = torch.zeros(max_length, max_length)
@@ -349,23 +387,28 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
 
         return decoded_words, decoder_attentions[:di + 1]
 
-def evaluateRandomly(encoder, decoder, n=10):
+def evaluateRandomly(encoder, supertag_encoder, decoder, n=10):
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
         print('=', pair[1])
-        output_words, attentions = evaluate(encoder, decoder, pair[0])
+        output_words, attentions = evaluate(encoder, supertag_encoder, decoder, pair[0], pair[2])
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print('')
 
 
-input_lang, output_lang, pairs = prepareData('ref', 'para', True)
+input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para')
 print(random.choice(pairs))
+
+teacher_forcing_ratio = 0.5
 
 hidden_size = 256
 encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
+
+supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size)
+
 attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
-trainIters(encoder1, attn_decoder1, 75000, print_every=5000)
-evaluateRandomly(encoder1, attn_decoder1)
+trainIters(encoder1, supertag_encoder1, attn_decoder1, 75000, print_every=5000)
+evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1)
