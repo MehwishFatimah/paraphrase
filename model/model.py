@@ -74,17 +74,22 @@ def normalizeString(s):
     s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
     return s
 
-def readLangs(lang1, lang2, reverse=False):
+def readLangs(lang1, lang2, test=False, reverse=False):
     print("Reading lines...")
+    data_dir = '../data/train-100000'
+    prefix = 'train'
+    if test:
+        data_dir = '../data/test-10000'
+        prefix = 'test'
 
     # Read the file and split into lines
-    ref_lines = open('../data/train-100000/train-ref-words.txt', encoding='utf-8').\
+    ref_lines = open('{}/{}-ref-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
     
-    para_lines = open('../data/train-100000/train-para-words.txt', encoding='utf-8').\
+    para_lines = open('{}/{}-para-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
 
-    tags = open('../data/train-100000/train-para-supertags.txt', encoding='utf-8').read().strip().split('\n')
+    tags = open('{}/{}-para-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
 
     # Split every line into pairs and normalize
     pairs = list(zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines], tags))
