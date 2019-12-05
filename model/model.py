@@ -348,7 +348,7 @@ def showPlot(points):
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
 
-def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang, supertag_lang, max_length=MAX_LENGTH):
+def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang, supertag_lang, output_lang, max_length=MAX_LENGTH):
     with torch.no_grad():
         input_tensor = tensorFromSentence(input_lang, sentence)
         supertag_tensor = tensorFromSentence(supertag_lang, supertags)
@@ -396,12 +396,12 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
 
         return decoded_words, decoder_attentions[:di + 1]
 
-def evaluateRandomly(encoder, supertag_encoder, decoder, input_lang, supertag_lang, n=10):
+def evaluateRandomly(encoder, supertag_encoder, decoder, input_lang, supertag_lang, output_lang, n=10):
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
         print('=', pair[1])
-        output_words, attentions = evaluate(encoder, supertag_encoder, decoder, pair[0], pair[2], input_lang, supertag_lang)
+        output_words, attentions = evaluate(encoder, supertag_encoder, decoder, pair[0], pair[2], input_lang, supertag_lang, output_lang)
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print('')
@@ -421,4 +421,4 @@ if __name__ == '__main__':
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
     trainIters(encoder1, supertag_encoder1, attn_decoder1, 75000, print_every=5000)
-    evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang)
+    evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)
