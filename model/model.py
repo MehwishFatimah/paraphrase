@@ -407,17 +407,18 @@ def evaluateRandomly(encoder, supertag_encoder, decoder, n=10):
         print('')
 
 
-input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para')
-print(random.choice(pairs))
+if __name__ == '__main__':
+    input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para')
+    print(random.choice(pairs))
 
-teacher_forcing_ratio = 0.5
+    teacher_forcing_ratio = 0.5
 
-hidden_size = 256
-encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
+    hidden_size = 256
+    encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 
-supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
+    supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
 
-attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
+    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
-trainIters(encoder1, supertag_encoder1, attn_decoder1, 75000, print_every=5000)
-evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1)
+    trainIters(encoder1, supertag_encoder1, attn_decoder1, 75000, print_every=5000)
+    evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1)
