@@ -19,7 +19,7 @@ from model import EncoderRNN, BiLSTM, AttnDecoderRNN, prepareData, evaluate
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para', 'train')
+input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para', test=False)
 teacher_forcing_ratio = 0.5
 hidden_size = 256
 
@@ -36,7 +36,7 @@ attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).
 attn_decoder1.load_state_dict(torch.load('12-5-19/decoder_step_75000.pt'))
 attn_decoder1.eval()
 
-test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', 'test')
+test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True)
 
 
 with open('12-5-19/test_output.txt', 'w') as f:

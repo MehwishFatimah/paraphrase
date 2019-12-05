@@ -107,8 +107,8 @@ def readLangs(lang1, lang2, test=False, reverse=False):
 
     return input_lang, output_lang, supertag_lang, pairs
 
-def prepareData(lang1, lang2, reverse=False):
-    input_lang, output_lang, supertag_lang, pairs = readLangs(lang1, lang2, reverse)
+def prepareData(lang1, lang2, test=False, reverse=False):
+    input_lang, output_lang, supertag_lang, pairs = readLangs(lang1, lang2, test, reverse)
     print("Read %s sentence pairs" % len(pairs))
     pairs = filterPairs(pairs)
     print("Trimmed to %s sentence pairs" % len(pairs))
