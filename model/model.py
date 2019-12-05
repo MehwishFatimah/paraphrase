@@ -324,7 +324,7 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
             torch.save(encoder.state_dict(), 'encoder_step_{}.pt'.format(iter))
             torch.save(supertag_encoder.state_dict(), 'supertag_encoder_step_{}.pt'.format(iter))
             torch.save(decoder.state_dict(), 'decoder_step_{}.pt'.format(iter))
-            
+
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
 
@@ -356,7 +356,7 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, max_length
 
 
         encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
-        supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
+        # supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
 
         for ei in range(input_length):
             encoder_output, encoder_hidden = encoder(input_tensor[ei],
@@ -365,12 +365,12 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, max_length
 
         for ei in range(supertag_length):
             supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
-            supertag_enc_outputs[ei] = supertag_output[0,0]
+            # supertag_enc_outputs[ei] = supertag_output[0,0]
 
         decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
         # decoder_hidden = encoder_hidden
-        decoder_hidden = torch.cat((encoder_hidden, supertag_output.view(1,1,-1)), dim=2).view(1,1,-1)
+        decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
 
 
         decoded_words = []
@@ -410,7 +410,7 @@ teacher_forcing_ratio = 0.5
 hidden_size = 256
 encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 
-supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size)
+supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
 
 attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
