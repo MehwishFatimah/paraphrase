@@ -254,7 +254,7 @@ def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encode
 
     decoder_input = torch.tensor([[SOS_token]], device=device)
 
-    decoder_hidden = torch.cat((encoder_hidden, supertag_output.view(1,1,-1)), dim=2).view(1,1,-1)
+    decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
     
     use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
