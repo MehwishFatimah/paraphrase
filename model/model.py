@@ -207,7 +207,7 @@ class AttnDecoderRNN(nn.Module):
 
 
 def indexesFromSentence(lang, sentence):
-    return [lang.word2index[word] for word in sentence.split(' ')]
+    return [lang.word2index[word] for word in sentence.split(' ') if word in lang.word2index]
 
 
 def tensorFromSentence(lang, sentence):
