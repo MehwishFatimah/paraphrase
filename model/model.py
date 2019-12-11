@@ -177,26 +177,29 @@ class AttnDecoderRNN(nn.Module):
         self.max_length = max_length
 
         self.embedding = nn.Embedding(self.output_size, self.hidden_size)
-        self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
-        self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
+        self.attn = nn.Linear(self.hidden_size * 4, self.max_length)
+        self.attn_combine = nn.Linear(self.hidden_size * 4, self.hidden_size)
         self.dropout = nn.Dropout(self.dropout_p)
-        self.gru = nn.GRU(self.hidden_size*3, self.hidden_size*3)
-        self.out = nn.Linear(self.hidden_size*3, self.output_size)
+        self.gru = nn.GRU(self.hidden_size, self.hidden_size)
+        self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, input, hidden, encoder_outputs):
+    def forward(self, input, hidden, encoder_outputs, supertag_hidden):
         embedded = self.embedding(input).view(1, 1, -1)
         embedded = self.dropout(embedded)
 
+        # concat supertag hidden for current tag with embedded input
+        inp = torch.cat((embedded[0], supertag_hidden.view(1,-1)), 1)
+
         attn_weights = F.softmax(
-            self.attn(torch.cat((embedded[0], hidden[0][:,:self.hidden_size]), 1)), dim=1)
+            self.attn(torch.cat((inp, hidden[0]), 1)), dim=1)
         attn_applied = torch.bmm(attn_weights.unsqueeze(0),
                                  encoder_outputs.unsqueeze(0))
 
-        output = torch.cat((embedded[0], attn_applied[0]), 1)
+        output = torch.cat((inp, attn_applied[0]), 1)
         output = self.attn_combine(output).unsqueeze(0)
 
         output = F.relu(output)
-        output = torch.cat((output, hidden[:,:,self.hidden_size:]),2)
+        # output = torch.cat((output, hidden[:,:,self.hidden_size:]),2)
         output, hidden = self.gru(output, hidden)
 
         output = F.log_softmax(self.out(output[0]), dim=1)
@@ -236,7 +239,7 @@ def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encode
     supertag_length = supertag_tensor.size(0)
 
     encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
-    supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
+    supertag_enc_hiddens = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
 
     loss = 0
 
@@ -247,14 +250,15 @@ def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encode
 
     for ei in range(supertag_length):
         supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
-        supertag_enc_outputs[ei] = supertag_output[0,0]
+        supertag_enc_hiddens[ei] = supertag_hidden.view(1,1,-1)
 
 
-    supertag_output = torch.cat((supertag_enc_outputs[0][supertag_encoder.hidden_size:], supertag_enc_outputs[-1][:supertag_encoder.hidden_size]))
+    # supertag_output = torch.cat((supertag_enc_outputs[0][supertag_encoder.hidden_size:], supertag_enc_outputs[-1][:supertag_encoder.hidden_size]))
 
     decoder_input = torch.tensor([[SOS_token]], device=device)
 
-    decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
+    decoder_hidden = encoder_hidden
+    # decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
     
     use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
@@ -262,7 +266,7 @@ def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encode
         # Teacher forcing: Feed the target as the next input
         for di in range(target_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+                decoder_input, decoder_hidden, encoder_outputs, supertag_enc_hiddens[di])
             loss += criterion(decoder_output, target_tensor[di])
             decoder_input = target_tensor[di]  # Teacher forcing
 
@@ -270,7 +274,7 @@ def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encode
         # Without teacher forcing: use its own predictions as the next input
         for di in range(target_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+                decoder_input, decoder_hidden, encoder_outputs, supertag_enc_hiddens[di])
             topv, topi = decoder_output.topk(1)
             decoder_input = topi.squeeze().detach()  # detach from history as input
 
@@ -326,9 +330,9 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            torch.save(encoder.state_dict(), 'encoder_step_{}.pt'.format(iter))
-            torch.save(supertag_encoder.state_dict(), 'supertag_encoder_step_{}.pt'.format(iter))
-            torch.save(decoder.state_dict(), 'decoder_step_{}.pt'.format(iter))
+            torch.save(encoder.state_dict(), '12-11-19/encoder_step_{}.pt'.format(iter))
+            torch.save(supertag_encoder.state_dict(), '12-11-19/supertag_encoder_step_{}.pt'.format(iter))
+            torch.save(decoder.state_dict(), '12-11-19/decoder_step_{}.pt'.format(iter))
 
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
