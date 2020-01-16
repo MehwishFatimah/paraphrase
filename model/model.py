@@ -333,9 +333,9 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            torch.save(encoder.state_dict(), '12-11-19/encoder_step_{}.pt'.format(iter))
-            torch.save(supertag_encoder.state_dict(), '12-11-19/supertag_encoder_step_{}.pt'.format(iter))
-            torch.save(decoder.state_dict(), '12-11-19/decoder_step_{}.pt'.format(iter))
+            torch.save(encoder.state_dict(), '1-15-20/encoder_step_{}.pt'.format(iter))
+            torch.save(supertag_encoder.state_dict(), '1-15-20/supertag_encoder_step_{}.pt'.format(iter))
+            torch.save(decoder.state_dict(), '1-15-20/decoder_step_{}.pt'.format(iter))
 
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
