@@ -390,7 +390,7 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
 
         for di in range(max_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+                decoder_input, decoder_hidden, encoder_outputs, supertag_enc_hiddens[di])
             decoder_attentions[di] = decoder_attention.data
             topv, topi = decoder_output.data.topk(1)
             if topi.item() == EOS_token:
@@ -427,5 +427,5 @@ if __name__ == '__main__':
 
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
-    trainIters(encoder1, supertag_encoder1, attn_decoder1, 500000, print_every=5000)
+    trainIters(encoder1, supertag_encoder1, attn_decoder1, 250000, print_every=5000)
     evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)
