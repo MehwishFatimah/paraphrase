@@ -26,8 +26,8 @@ EOS_token = 1
 SOS_token = 0
 EOS_token = 1
 
-MAX_LENGTH = 20
-
+MAX_LENGTH = 15
+MIN_LENGTH = 7
 
 class Lang:
     def __init__(self, name):
@@ -53,7 +53,10 @@ class Lang:
 def filterPair(p):
     return len(p[0].split(' ')) < MAX_LENGTH and \
         len(p[1].split(' ')) < MAX_LENGTH and \
-            len(p[2].split(' ')) < MAX_LENGTH
+            len(p[2].split(' ')) < MAX_LENGTH and \
+                len(p[0].split(' ')) > MIN_LENGTH and \
+                    len(p[1].split(' ')) > MIN_LENGTH and \
+                        len(p[2].split(' ')) > MIN_LENGTH
 
 
 def filterPairs(pairs):
@@ -424,5 +427,5 @@ if __name__ == '__main__':
 
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
-    trainIters(encoder1, supertag_encoder1, attn_decoder1, 75000, print_every=5000)
+    trainIters(encoder1, supertag_encoder1, attn_decoder1, 500000, print_every=5000)
     evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)
