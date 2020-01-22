@@ -368,6 +368,8 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
 
 
         encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
+        supertag_enc_hiddens = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
+
         # supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
 
         for ei in range(input_length):
@@ -378,6 +380,8 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
         for ei in range(supertag_length):
             supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
             # supertag_enc_outputs[ei] = supertag_output[0,0]
+            supertag_enc_hiddens[ei] = supertag_hidden.view(1,1,-1)
+
 
         decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
