@@ -8,7 +8,7 @@ import torch.nn as nn
 import time
 import math
 import matplotlib.pyplot as plt
-plt.switch_backend('agg')
+plt.switch_backend('GTKAgg')
 import matplotlib.ticker as ticker
 import numpy as np
 
@@ -53,10 +53,10 @@ class Lang:
 def filterPair(p):
     return len(p[0].split(' ')) < MAX_LENGTH and \
         len(p[1].split(' ')) < MAX_LENGTH and \
-            len(p[2].split(' ')) < MAX_LENGTH and \
-                len(p[0].split(' ')) > MIN_LENGTH and \
-                    len(p[1].split(' ')) > MIN_LENGTH and \
-                        len(p[2].split(' ')) > MIN_LENGTH
+            len(p[2].split(' ')) < MAX_LENGTH # and \
+                # len(p[0].split(' ')) > MIN_LENGTH and \
+                #     len(p[1].split(' ')) > MIN_LENGTH and \
+                #         len(p[2].split(' ')) > MIN_LENGTH
 
 
 def filterPairs(pairs):
@@ -79,10 +79,10 @@ def normalizeString(s):
 
 def readLangs(lang1, lang2, test=False, reverse=False):
     print("Reading lines...")
-    data_dir = '../data/train-100000'
+    data_dir = '../data/artificial-data/train'
     prefix = 'train'
     if test:
-        data_dir = '../data/test-10000'
+        data_dir = '../data/artificial-data/test'
         prefix = 'test'
 
     # Read the file and split into lines
@@ -385,8 +385,8 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
 
         decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
-        # decoder_hidden = encoder_hidden
-        decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
+        decoder_hidden = encoder_hidden
+        # decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
 
 
         decoded_words = []
