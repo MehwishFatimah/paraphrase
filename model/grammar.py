@@ -172,6 +172,11 @@ def remove_pp(tree, drop_p=0.5):
     tree.children = new_children
     return tree
 
+def remove_leading_comma(tree):
+    if tree.children[0].name == ',':
+        tree.children.pop(0)
+    return tree
+
 def most_common_syn(word, pos):
     synsets = wn.synsets(word, pos)
     max_freq = 0
@@ -260,7 +265,7 @@ def generate_modal_pair():
     
     return (sent1, sent2)
 
-
+MAX_LENGTH = 15
 def generate_pairs(n, filename, pair_fns):
     with open(filename + '_pairs.txt', 'w') as f:
         with open(filename + '_ref_words.txt', 'w') as r:
@@ -268,30 +273,35 @@ def generate_pairs(n, filename, pair_fns):
                 for _ in range(n):
                     pair_fn = random.choice(pair_fns)
                     s1, s2 = pair_fn()
-                    if pair_fn == generate_move_pp_pair:
-                        s2 = remove_pp(s2)
-                        s2 = substitute_synonyms(s2.sentence())
-                        f.write(s1.sentence() + '\t' + s2 + '\n')
-                        r.write(s1.sentence() + '\n')
-                        p.write(s2 + '\n')
-                    else:
-                        p1 = s1.sentence()
-                        r.write(p1 + '\n')
-                        p2 = s2.sentence()
-                        r.write(p2 + '\n')
+                    if len(s1.sentence().split(' ')) < MAX_LENGTH and \
+                        len(s2.sentence().split(' ')) < MAX_LENGTH:
+                        if pair_fn == generate_move_pp_pair:
+                            s2 = remove_pp(s2)
+                            s2 = remove_leading_comma(s2)
+                            s2 = substitute_synonyms(s2.sentence())
+                            f.write(s1.sentence() + '\t' + s2 + '\n')
+                            r.write(s1.sentence() + '\n')
+                            p.write(s2 + '\n')
+                        else:
+                            p1 = s1.sentence()
+                            r.write(p1 + '\n')
+                            p2 = s2.sentence()
+                            r.write(p2 + '\n')
 
-                        s2 = remove_pp(s2)
-                        s2 = substitute_synonyms(s2.sentence())
-                        p1 += '\t' + s2 + '\n'
-                        p.write(s2 + '\n')
+                            s2 = remove_pp(s2)
+                            s2 = remove_leading_comma(s2)
+                            s2 = substitute_synonyms(s2.sentence())
+                            p1 += '\t' + s2 + '\n'
+                            p.write(s2 + '\n')
 
-                        s1 = remove_pp(s1)
-                        s1 = substitute_synonyms(s1.sentence())
-                        p2 += '\t' + s1 + '\n'
-                        p.write(s1 + '\n')
-                        
-                        f.write(p1)
-                        f.write(p2)
+                            s1 = remove_pp(s1)
+                            s1 = remove_leading_comma(s1)
+                            s1 = substitute_synonyms(s1.sentence())
+                            p2 += '\t' + s1 + '\n'
+                            p.write(s1 + '\n')
+                            
+                            f.write(p1)
+                            f.write(p2)
 
 
 
@@ -299,6 +309,5 @@ def generate_pairs(n, filename, pair_fns):
 # generate_act_pass_pairs(10, 'pairs.txt')
 
 pair_fns = [generate_act_pass_pair, generate_move_pp_pair, generate_modal_pair]
-generate_pairs(160000, '../data/artificial_data/train', pair_fns)
+generate_pairs(40000, '../data/artificial-data/set-2/test/test', pair_fns)
 
-# print(generate_move_pp_pair())

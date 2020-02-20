@@ -1,7 +1,7 @@
 import nltk
 
 if __name__ == "__main__":
-    filename = '../data/artificial_data/test'
+    filename = '../data/artificial-data/set-2/train/train'
 
     with open(filename + "_ref_words.txt", 'r') as f:
         with open(filename + '_ref_tags.txt', 'w') as t:

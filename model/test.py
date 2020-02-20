@@ -26,21 +26,21 @@ if __name__ == '__main__':
 
 
     encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
-    encoder1.load_state_dict(torch.load('1-15-20/encoder_step_250000.pt'))
+    encoder1.load_state_dict(torch.load('2-19-20/encoder_step_250000.pt'))
     encoder1.eval()
 
     supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
-    supertag_encoder1.load_state_dict(torch.load('1-15-20/supertag_encoder_step_250000.pt'))
+    supertag_encoder1.load_state_dict(torch.load('2-19-20/supertag_encoder_step_250000.pt'))
     supertag_encoder1.eval()
 
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
-    attn_decoder1.load_state_dict(torch.load('1-15-20/decoder_step_250000.pt'))
+    attn_decoder1.load_state_dict(torch.load('2-19-20/decoder_step_250000.pt'))
     attn_decoder1.eval()
 
     test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True)
 
 
-    with open('1-15-20/test_output.txt', 'w') as f:
+    with open('2-19-20/test_output.txt', 'w') as f:
         for pair in test_pairs:
             output_words, attentions = evaluate(encoder1, supertag_encoder1, attn_decoder1, pair[0], pair[2], input_lang, supertag_lang, output_lang)
             output_sentence = ' '.join(output_words)

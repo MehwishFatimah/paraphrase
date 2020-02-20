@@ -8,7 +8,7 @@ import torch.nn as nn
 import time
 import math
 import matplotlib.pyplot as plt
-plt.switch_backend('GTKAgg')
+plt.switch_backend('agg')
 import matplotlib.ticker as ticker
 import numpy as np
 
@@ -79,10 +79,10 @@ def normalizeString(s):
 
 def readLangs(lang1, lang2, test=False, reverse=False):
     print("Reading lines...")
-    data_dir = '../data/artificial-data/train'
+    data_dir = '../data/artificial-data/set-2/train'
     prefix = 'train'
     if test:
-        data_dir = '../data/artificial-data/test'
+        data_dir = '../data/artificial-data/set-2/test'
         prefix = 'test'
 
     # Read the file and split into lines
@@ -333,9 +333,9 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            torch.save(encoder.state_dict(), '1-15-20/encoder_step_{}.pt'.format(iter))
-            torch.save(supertag_encoder.state_dict(), '1-15-20/supertag_encoder_step_{}.pt'.format(iter))
-            torch.save(decoder.state_dict(), '1-15-20/decoder_step_{}.pt'.format(iter))
+            torch.save(encoder.state_dict(), '2-19-20/encoder_step_{}.pt'.format(iter))
+            torch.save(supertag_encoder.state_dict(), '2-19-20/supertag_encoder_step_{}.pt'.format(iter))
+            torch.save(decoder.state_dict(), '2-19-20/decoder_step_{}.pt'.format(iter))
 
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
