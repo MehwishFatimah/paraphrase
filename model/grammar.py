@@ -308,6 +308,25 @@ def generate_pairs(n, filename, pair_fns):
 # print(generate_act_pass_pair())
 # generate_act_pass_pairs(10, 'pairs.txt')
 
-pair_fns = [generate_act_pass_pair, generate_move_pp_pair, generate_modal_pair]
-generate_pairs(40000, '../data/artificial-data/set-2/test/test', pair_fns)
+# pair_fns = [generate_act_pass_pair, generate_move_pp_pair, generate_modal_pair]
+# generate_pairs(40000, '../data/artificial-data/set-2/test/test', pair_fns)
 
+
+def generate_act_pass_pairs(n, path):
+    with open(path + 'act-pass-pairs.txt', 'w') as pairs:
+        with open(path + 'act-pass-ref.txt', 'w') as ref:
+            with open(path + 'act-pass-para.txt', 'w') as para:
+                for _ in range(n):
+                    s1, s2 = generate_act_pass_pair()
+                    s1 = s1.sentence()
+                    s2 = s2.sentence()
+                    pairs.write(s1 + '\t' + s2 + '\n')
+                    pairs.write(s2 + '\t' + s1 + '\n')
+
+                    ref.write(s1 + '\n')
+                    ref.write(s2 + '\n')
+
+                    para.write(s2 + '\n')
+                    para.write(s1 + '\n')
+
+generate_act_pass_pairs(25000, '../data/artificial-data/set-2/active-passive/')

@@ -82,8 +82,8 @@ def readLangs(lang1, lang2, test=False, reverse=False):
     data_dir = '../data/artificial-data/set-2/train'
     prefix = 'train'
     if test:
-        data_dir = '../data/artificial-data/set-2/test'
-        prefix = 'test'
+        data_dir = '../data/artificial-data/set-2/active-passive'
+        prefix = 'act-pass'
 
     # Read the file and split into lines
     ref_lines = open('{}/{}-ref-words.txt'.format(data_dir, prefix), encoding='utf-8').\
