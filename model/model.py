@@ -77,13 +77,13 @@ def normalizeString(s):
     s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
     return s
 
-def readLangs(lang1, lang2, test=False, reverse=False):
+def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
     print("Reading lines...")
     data_dir = '../data/artificial-data/set-2/train'
     prefix = 'train'
     if test:
         data_dir = '../data/artificial-data/set-2/test'
-        prefix = 'modal'
+        prefix = 'test'
 
     # Read the file and split into lines
     ref_lines = open('{}/{}-ref-words.txt'.format(data_dir, prefix), encoding='utf-8').\
@@ -92,8 +92,11 @@ def readLangs(lang1, lang2, test=False, reverse=False):
     para_lines = open('{}/{}-para-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
 
-    tags = open('{}/{}-opennmt-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
-
+    if openNMT:
+        tags = open('{}/{}-opennmt-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+    else:
+        tags = open('{}/{}-para-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+    
     # Split every line into pairs and normalize
     pairs = list(zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines], tags))
 
@@ -110,8 +113,8 @@ def readLangs(lang1, lang2, test=False, reverse=False):
 
     return input_lang, output_lang, supertag_lang, pairs
 
-def prepareData(lang1, lang2, test=False, reverse=False):
-    input_lang, output_lang, supertag_lang, pairs = readLangs(lang1, lang2, test, reverse)
+def prepareData(lang1, lang2, test=False, reverse=False, openNMT=False):
+    input_lang, output_lang, supertag_lang, pairs = readLangs(lang1, lang2, test, reverse, openNMT)
     print("Read %s sentence pairs" % len(pairs))
     pairs = filterPairs(pairs)
     print("Trimmed to %s sentence pairs" % len(pairs))

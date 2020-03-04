@@ -37,7 +37,7 @@ if __name__ == '__main__':
     attn_decoder1.load_state_dict(torch.load('2-19-20/decoder_step_250000.pt'))
     attn_decoder1.eval()
 
-    test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True)
+    test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True, openNMT=True)
 
 
     with open('2-19-20/opennmt-output.txt', 'w') as f:
