@@ -40,7 +40,7 @@ if __name__ == '__main__':
     test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True)
 
 
-    with open('2-19-20/modal-output.txt', 'w') as f:
+    with open('2-19-20/opennmt-output.txt', 'w') as f:
         for pair in test_pairs:
             output_words, attentions = evaluate(encoder1, supertag_encoder1, attn_decoder1, pair[0], pair[2], input_lang, supertag_lang, output_lang)
             output_sentence = ' '.join(output_words)

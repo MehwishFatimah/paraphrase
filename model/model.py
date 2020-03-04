@@ -82,7 +82,7 @@ def readLangs(lang1, lang2, test=False, reverse=False):
     data_dir = '../data/artificial-data/set-2/train'
     prefix = 'train'
     if test:
-        data_dir = '../data/artificial-data/set-2/modal'
+        data_dir = '../data/artificial-data/set-2/test'
         prefix = 'modal'
 
     # Read the file and split into lines
@@ -92,7 +92,7 @@ def readLangs(lang1, lang2, test=False, reverse=False):
     para_lines = open('{}/{}-para-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
 
-    tags = open('{}/{}-para-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+    tags = open('{}/{}-opennmt-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
 
     # Split every line into pairs and normalize
     pairs = list(zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines], tags))
