@@ -44,6 +44,6 @@ if __name__ == '__main__':
 
     with open('3-11-20/linear-output.txt', 'w') as f:
         for pair in test_pairs:
-            output_words, attentions = evaluate(encoder1, supertag_encoder1, attn_decoder1, pair[0], pair[2], input_lang, supertag_lang, output_lang)
+            output_words, attentions = evaluate(encoder1, supertag_encoder1, attn_decoder1, pair[0], pair[2], input_lang, supertag_lang, output_lang, bidir_supertags=False)
             output_sentence = ' '.join(output_words)
             f.write(output_sentence + '\n')
