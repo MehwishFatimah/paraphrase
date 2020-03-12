@@ -22,7 +22,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if __name__ == '__main__':
     input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para', test=False)
     teacher_forcing_ratio = 0.5
-    hidden_size = 256
+    hidden_size = 50
 
 
     encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
