@@ -354,7 +354,7 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
             torch.save(encoder.state_dict(), '3-11-20/encoder_step_{}.pt'.format(iter))
-            torch.save(supertag_encoder.state_dict(), '2-19-20/supertag_encoder_step_{}.pt'.format(iter))
+            torch.save(supertag_encoder.state_dict(), '3-11-20/supertag_encoder_step_{}.pt'.format(iter))
             torch.save(decoder.state_dict(), '3-11-20/decoder_step_{}.pt'.format(iter))
 
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
@@ -391,8 +391,10 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
 
 
         encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
-        supertag_enc_hiddens = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
-
+        if bidir_supertags:
+            supertag_enc_hiddens = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
+        else:
+            supertag_enc_hiddens = torch.zeros(max_length, supertag_encoder.hidden_size, device=device)
         # supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
 
         for ei in range(input_length):
