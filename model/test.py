@@ -35,7 +35,7 @@ if __name__ == '__main__':
     supertag_encoder1.load_state_dict(torch.load('3-11-20/supertag_encoder_step_250000.pt'))
     supertag_encoder1.eval()
 
-    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
+    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1,bidir_supertags=False).to(device)
     attn_decoder1.load_state_dict(torch.load('3-11-20/decoder_step_250000.pt'))
     attn_decoder1.eval()
 

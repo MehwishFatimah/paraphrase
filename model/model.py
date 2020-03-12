@@ -175,7 +175,7 @@ class BiLSTM(nn.Module):
     
 
 class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH):
+    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH, bidir_supertags=True):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -183,8 +183,12 @@ class AttnDecoderRNN(nn.Module):
         self.max_length = max_length
 
         self.embedding = nn.Embedding(self.output_size, self.hidden_size)
-        self.attn = nn.Linear(self.hidden_size * 4, self.max_length)
-        self.attn_combine = nn.Linear(self.hidden_size * 4, self.hidden_size)
+        if bidir_supertags:
+            self.attn = nn.Linear(self.hidden_size * 4, self.max_length)
+            self.attn_combine = nn.Linear(self.hidden_size * 4, self.hidden_size)
+        else:
+            self.attn = nn.Linear(self.hidden_size * 3, self.max_length)
+            self.attn_combine = nn.Linear(self.hidden_size * 3, self.hidden_size)
         self.dropout = nn.Dropout(self.dropout_p)
         self.gru = nn.GRU(self.hidden_size, self.hidden_size)
         self.out = nn.Linear(self.hidden_size, self.output_size)
@@ -440,13 +444,13 @@ if __name__ == '__main__':
 
     teacher_forcing_ratio = 0.5
 
-    hidden_size = 256
+    hidden_size = 50
     encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 
     # supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
     supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
-    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
+    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=False).to(device)
 
     trainIters(encoder1, supertag_encoder1, attn_decoder1, 250000, print_every=5000, bidir_supertags=False)
     evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)
