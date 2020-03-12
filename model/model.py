@@ -375,7 +375,7 @@ def showPlot(points):
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
 
-def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang, supertag_lang, output_lang, max_length=MAX_LENGTH):
+def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang, supertag_lang, output_lang, max_length=MAX_LENGTH, bidir_supertags=True):
     with torch.no_grad():
         input_tensor = tensorFromSentence(input_lang, sentence)
         supertag_tensor = tensorFromSentence(supertag_lang, supertags)
@@ -384,7 +384,10 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
         supertag_length = supertag_tensor.size()[0]
 
         encoder_hidden = encoder.initHidden()
-        supertag_hidden, c0 = supertag_encoder.initHidden()
+        if bidir_supertags:
+            supertag_hidden, c0 = supertag_encoder.initHidden()
+        else: 
+            supertag_hidden = supertag_encoder.initHidden()
 
 
         encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
@@ -398,9 +401,13 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
             encoder_outputs[ei] += encoder_output[0, 0]
 
         for ei in range(supertag_length):
-            supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
-            # supertag_enc_outputs[ei] = supertag_output[0,0]
-            supertag_enc_hiddens[ei] = supertag_hidden.view(1,1,-1)
+
+            if bidir_supertags:
+                supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
+                supertag_enc_hiddens[ei] = supertag_hidden.view(1,1,-1)
+            else:
+                supertag_output, supertag_hidden = supertag_encoder(supertag_tensor[ei], supertag_hidden)
+                supertag_enc_hiddens[ei] = supertag_output[0, 0]
 
 
         decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
@@ -427,12 +434,12 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
 
         return decoded_words, decoder_attentions[:di + 1]
 
-def evaluateRandomly(encoder, supertag_encoder, decoder, input_lang, supertag_lang, output_lang, n=10):
+def evaluateRandomly(encoder, supertag_encoder, decoder, input_lang, supertag_lang, output_lang, n=10, bidir_supertags=True):
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
         print('=', pair[1])
-        output_words, attentions = evaluate(encoder, supertag_encoder, decoder, pair[0], pair[2], input_lang, supertag_lang, output_lang)
+        output_words, attentions = evaluate(encoder, supertag_encoder, decoder, pair[0], pair[2], input_lang, supertag_lang, output_lang, bidir_supertags=bidir_supertags)
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print('')
