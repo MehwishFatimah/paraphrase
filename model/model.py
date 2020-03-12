@@ -232,9 +232,15 @@ def tensorsFromPair(pair):
     return (input_tensor, target_tensor, supertag_tensor)
 
 
-def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encoder, decoder, encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, criterion, max_length=MAX_LENGTH):
+def train(input_tensor, supertag_tensor, target_tensor, 
+            encoder, supertag_encoder, decoder, 
+            encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, 
+            criterion, max_length=MAX_LENGTH, bidir_supertags=True):
     encoder_hidden = encoder.initHidden()
-    supertag_hidden, c0 = supertag_encoder.initHidden()
+    if bidir_supertags:
+        supertag_hidden, c0 = supertag_encoder.initHidden()
+    else:
+        supertag_hidden = supertag_encoder.initHidden()
 
     encoder_optimizer.zero_grad()
     supertag_encoder_optimizer.zero_grad()
@@ -245,7 +251,10 @@ def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encode
     supertag_length = supertag_tensor.size(0)
 
     encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
-    supertag_enc_hiddens = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
+    if bidir_supertags:
+        supertag_enc_hiddens = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
+    else:
+        supertag_enc_hiddens = torch.zeros(max_length, supertag_encoder.hidden_size, device=device)
 
     loss = 0
 
@@ -255,8 +264,12 @@ def train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encode
         encoder_outputs[ei] = encoder_output[0, 0]
 
     for ei in range(supertag_length):
-        supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
-        supertag_enc_hiddens[ei] = supertag_hidden.view(1,1,-1)
+        if bidir_supertags:
+            supertag_output, (supertag_hidden,c0) = supertag_encoder(supertag_tensor[ei], supertag_hidden,c0)
+            supertag_enc_hiddens[ei] = supertag_hidden.view(1,1,-1)
+        else:
+            supertag_output, supertag_hidden = supertag_encoder(supertag_tensor[ei], supertag_hidden)
+            supertag_enc_hiddens[ei] = supertag_output[0, 0]
 
 
     # supertag_output = torch.cat((supertag_enc_outputs[0][supertag_encoder.hidden_size:], supertag_enc_outputs[-1][:supertag_encoder.hidden_size]))
@@ -308,7 +321,7 @@ def timeSince(since, percent):
     rs = es - s
     return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
 
-def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
+def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, bidir_supertags=True):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -329,16 +342,16 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
         supertag_tensor = training_pair[2]
 
         loss = train(input_tensor, supertag_tensor, target_tensor, encoder, supertag_encoder,
-                     decoder, encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, criterion)
+                     decoder, encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, criterion, bidir_supertags=bidir_supertags)
         print_loss_total += loss
         plot_loss_total += loss
 
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            torch.save(encoder.state_dict(), '2-19-20/encoder_step_{}.pt'.format(iter))
+            torch.save(encoder.state_dict(), '3-11-20/encoder_step_{}.pt'.format(iter))
             torch.save(supertag_encoder.state_dict(), '2-19-20/supertag_encoder_step_{}.pt'.format(iter))
-            torch.save(decoder.state_dict(), '2-19-20/decoder_step_{}.pt'.format(iter))
+            torch.save(decoder.state_dict(), '3-11-20/decoder_step_{}.pt'.format(iter))
 
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
@@ -430,9 +443,10 @@ if __name__ == '__main__':
     hidden_size = 256
     encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 
-    supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
+    # supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
+    supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
-    trainIters(encoder1, supertag_encoder1, attn_decoder1, 250000, print_every=5000)
+    trainIters(encoder1, supertag_encoder1, attn_decoder1, 250000, print_every=5000, bidir_supertags=False)
     evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)
