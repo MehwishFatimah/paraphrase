@@ -462,8 +462,10 @@ if __name__ == '__main__':
     hidden_size = HIDDEN_SIZE
     encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 
-    # supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
-    supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
+    if BIDIR_SUPERTAGS:
+        supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
+    else:
+        supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=BIDIR_SUPERTAGS).to(device)
 

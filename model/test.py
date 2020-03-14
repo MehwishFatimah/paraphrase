@@ -33,8 +33,10 @@ if __name__ == '__main__':
     encoder1.load_state_dict(torch.load(SAVE_DIR + 'encoder_step_250000.pt'))
     encoder1.eval()
 
-    # supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
-    supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
+    if BIDIR_SUPERTAGS:
+        supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
+    else:
+        supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
     supertag_encoder1.load_state_dict(torch.load(SAVE_DIR + 'supertag_encoder_step_250000.pt'))
     supertag_encoder1.eval()
