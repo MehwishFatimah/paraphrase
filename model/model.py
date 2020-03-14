@@ -29,6 +29,12 @@ EOS_token = 1
 MAX_LENGTH = 15
 MIN_LENGTH = 7
 
+HIDDEN_SIZE = 50
+BIDIR_SUPERTAGS = True
+TRAIN_DIR = 'linear-hierarchical-experiment/train'
+TEST_DIR = 'linear-hierarchical-experiment/test'
+SAVE_DIR = '3-14-20/'
+
 class Lang:
     def __init__(self, name):
         self.name = name
@@ -79,10 +85,10 @@ def normalizeString(s):
 
 def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
     print("Reading lines...")
-    data_dir = '../data/artificial-data/set-2/train'
+    data_dir = TRAIN_DIR
     prefix = 'train'
     if test:
-        data_dir = '../data/artificial-data/set-2/test'
+        data_dir = TEST_DIR
         prefix = 'test'
 
     # Read the file and split into lines
@@ -175,7 +181,7 @@ class BiLSTM(nn.Module):
     
 
 class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH, bidir_supertags=True):
+    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH, bidir_supertags=BIDIR_SUPERTAGS):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -353,9 +359,9 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            torch.save(encoder.state_dict(), '3-11-20/encoder_step_{}.pt'.format(iter))
-            torch.save(supertag_encoder.state_dict(), '3-11-20/supertag_encoder_step_{}.pt'.format(iter))
-            torch.save(decoder.state_dict(), '3-11-20/decoder_step_{}.pt'.format(iter))
+            torch.save(encoder.state_dict(), SAVE_DIR + 'encoder_step_{}.pt'.format(iter))
+            torch.save(supertag_encoder.state_dict(), SAVE_DIR + 'supertag_encoder_step_{}.pt'.format(iter))
+            torch.save(decoder.state_dict(), SAVE_DIR + 'decoder_step_{}.pt'.format(iter))
 
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
@@ -453,13 +459,13 @@ if __name__ == '__main__':
 
     teacher_forcing_ratio = 0.5
 
-    hidden_size = 50
+    hidden_size = HIDDEN_SIZE
     encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 
     # supertag_encoder1 = BiLSTM(supertag_lang.n_words, hidden_size).to(device)
     supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
-    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=False).to(device)
+    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=BIDIR_SUPERTAGS).to(device)
 
-    trainIters(encoder1, supertag_encoder1, attn_decoder1, 250000, print_every=5000, bidir_supertags=False)
+    trainIters(encoder1, supertag_encoder1, attn_decoder1, 250000, print_every=5000, bidir_supertags=BIDIR_SUPERTAGS)
     evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)
