@@ -33,7 +33,7 @@ HIDDEN_SIZE = 50
 BIDIR_SUPERTAGS = True
 TRAIN_DIR = 'linear-hierarchical-experiment/train'
 TEST_DIR = 'linear-hierarchical-experiment/test'
-SAVE_DIR = '3-14-20/'
+SAVE_DIR = '3-17-20/'
 
 class Lang:
     def __init__(self, name):
@@ -245,7 +245,7 @@ def tensorsFromPair(pair):
 def train(input_tensor, supertag_tensor, target_tensor, 
             encoder, supertag_encoder, decoder, 
             encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, 
-            criterion, max_length=MAX_LENGTH, bidir_supertags=True):
+            criterion, max_length=MAX_LENGTH, bidir_supertags=BIDIR_SUPERTAGS):
     encoder_hidden = encoder.initHidden()
     if bidir_supertags:
         supertag_hidden, c0 = supertag_encoder.initHidden()
