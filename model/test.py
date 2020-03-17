@@ -19,7 +19,7 @@ from model import EncoderRNN, BiLSTM, AttnDecoderRNN, prepareData, evaluate
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-SAVE_DIR = '3-14-20/'
+SAVE_DIR = '3-17-20/'
 BIDIR_SUPERTAGS = True
 HIDDEN_SIZE = 50
 
