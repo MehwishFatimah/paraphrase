@@ -48,7 +48,7 @@ if __name__ == '__main__':
     test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True, openNMT=False)
 
 
-    with open(SAVE_DIR + 'linear-output.txt', 'w') as f:
+    with open(SAVE_DIR + 'bidirectional-linear-output.txt', 'w') as f:
         for pair in test_pairs:
             output_words, attentions = evaluate(encoder1, supertag_encoder1, attn_decoder1, pair[0], pair[2], input_lang, supertag_lang, output_lang, bidir_supertags=BIDIR_SUPERTAGS)
             output_sentence = ' '.join(output_words)
