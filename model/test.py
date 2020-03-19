@@ -19,9 +19,10 @@ from model import EncoderRNN, BiLSTM, AttnDecoderRNN, prepareData, evaluate
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-SAVE_DIR = '3-17-20/'
+SAVE_DIR = '3-19-20-lin/'
 BIDIR_SUPERTAGS = True
 HIDDEN_SIZE = 50
+NUM_ITERATIONS = 500000
 
 if __name__ == '__main__':
     input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para', test=False)
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 
 
     encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
-    encoder1.load_state_dict(torch.load(SAVE_DIR + 'encoder_step_250000.pt'))
+    encoder1.load_state_dict(torch.load(SAVE_DIR + 'encoder_step_{}.pt'.format(NUM_ITERATIONS)))
     encoder1.eval()
 
     if BIDIR_SUPERTAGS:
@@ -38,11 +39,11 @@ if __name__ == '__main__':
     else:
         supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
-    supertag_encoder1.load_state_dict(torch.load(SAVE_DIR + 'supertag_encoder_step_250000.pt'))
+    supertag_encoder1.load_state_dict(torch.load(SAVE_DIR + 'supertag_encoder_step_{}.pt'.format(NUM_ITERATIONS)))
     supertag_encoder1.eval()
 
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1,bidir_supertags=BIDIR_SUPERTAGS).to(device)
-    attn_decoder1.load_state_dict(torch.load(SAVE_DIR + 'decoder_step_250000.pt'))
+    attn_decoder1.load_state_dict(torch.load(SAVE_DIR + 'decoder_step_{}.pt'.format(NUM_ITERATIONS)))
     attn_decoder1.eval()
 
     test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True, openNMT=False)

@@ -33,7 +33,8 @@ HIDDEN_SIZE = 50
 BIDIR_SUPERTAGS = True
 TRAIN_DIR = 'linear-hierarchical-experiment/train'
 TEST_DIR = 'linear-hierarchical-experiment/test'
-SAVE_DIR = '3-17-20/'
+SAVE_DIR = '3-19-20-lin/'
+NUM_ITERATIONS = 500000
 
 class Lang:
     def __init__(self, name):
@@ -469,5 +470,5 @@ if __name__ == '__main__':
 
     attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=BIDIR_SUPERTAGS).to(device)
 
-    trainIters(encoder1, supertag_encoder1, attn_decoder1, 250000, print_every=5000, bidir_supertags=BIDIR_SUPERTAGS)
+    trainIters(encoder1, supertag_encoder1, attn_decoder1, NUM_ITERATIONS, print_every=10000, bidir_supertags=BIDIR_SUPERTAGS)
     evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)
