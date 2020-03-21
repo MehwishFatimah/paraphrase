@@ -29,12 +29,12 @@ EOS_token = 1
 MAX_LENGTH = 15
 MIN_LENGTH = 7
 
-HIDDEN_SIZE = 50
-BIDIR_SUPERTAGS = True
+HIDDEN_SIZE = 100
+BIDIR_SUPERTAGS = False
 TRAIN_DIR = 'linear-hierarchical-experiment/train'
 TEST_DIR = 'linear-hierarchical-experiment/test'
-SAVE_DIR = '3-19-20-lin/'
-NUM_ITERATIONS = 500000
+SAVE_DIR = '3-21-20-lin-uni-100/'
+NUM_ITERATIONS = 250000
 
 class Lang:
     def __init__(self, name):
