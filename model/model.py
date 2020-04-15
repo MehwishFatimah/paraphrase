@@ -29,12 +29,12 @@ EOS_token = 1
 MAX_LENGTH = 15
 MIN_LENGTH = 7
 
-HIDDEN_SIZE = 100
-BIDIR_SUPERTAGS = False
+HIDDEN_SIZE = 50
+BIDIR_SUPERTAGS = True
 TRAIN_DIR = 'linear-hierarchical-experiment/train'
-TEST_DIR = 'linear-hierarchical-experiment/test'
-SAVE_DIR = '3-21-20-lin-uni-100/'
-NUM_ITERATIONS = 250000
+TEST_DIR = 'linear-hierarchical-experiment/active-passive'
+SAVE_DIR = '3-19-20-lin/'
+NUM_ITERATIONS = 500000
 
 class Lang:
     def __init__(self, name):
@@ -90,7 +90,7 @@ def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
     prefix = 'train'
     if test:
         data_dir = TEST_DIR
-        prefix = 'test'
+        prefix = 'act-pass'
 
     # Read the file and split into lines
     ref_lines = open('{}/{}-ref-ordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
