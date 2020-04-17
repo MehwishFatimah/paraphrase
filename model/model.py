@@ -29,12 +29,12 @@ EOS_token = 1
 MAX_LENGTH = 15
 MIN_LENGTH = 7
 
-HIDDEN_SIZE = 50
-BIDIR_SUPERTAGS = True
+HIDDEN_SIZE = 256
+BIDIR_SUPERTAGS = False
 TRAIN_DIR = 'linear-hierarchical-experiment/train'
-TEST_DIR = 'linear-hierarchical-experiment/active-passive'
-SAVE_DIR = '3-19-20-lin/'
-NUM_ITERATIONS = 500000
+TEST_DIR = 'linear-hierarchical-experiment/test'
+SAVE_DIR = '4-17-20-hier-uni-256/'
+NUM_ITERATIONS = 250000
 
 class Lang:
     def __init__(self, name):
@@ -90,19 +90,19 @@ def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
     prefix = 'train'
     if test:
         data_dir = TEST_DIR
-        prefix = 'act-pass'
+        prefix = 'test'
 
     # Read the file and split into lines
     ref_lines = open('{}/{}-ref-ordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
     
-    para_lines = open('{}/{}-para-ordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
+    para_lines = open('{}/{}-para-reordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
 
     if openNMT:
         tags = open('{}/{}-opennmt-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
     else:
-        tags = open('{}/{}-para-ordered-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+        tags = open('{}/{}-para-reordered-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
     
     # Split every line into pairs and normalize
     pairs = list(zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines], tags))
