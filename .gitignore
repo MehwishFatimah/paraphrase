@@ -11,3 +11,5 @@ train-ref-mica-output.txt
 test-ref-mica-output.txt
 test-para-mica-output.txt
 test-opennmt-mica-output.txt
+Moses-for-Mere-Mortals-1.23/
+MMM/
