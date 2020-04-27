@@ -6,3 +6,8 @@ para-nmt-5m-processed-para.txt
 phrase-table-filtered-0.6.txt
 phrase-table.paraphrase.for_train.ref-para
 __pycache__/
+train-para-mica-output.txt
+train-ref-mica-output.txt
+test-ref-mica-output.txt
+test-para-mica-output.txt
+test-opennmt-mica-output.txt
