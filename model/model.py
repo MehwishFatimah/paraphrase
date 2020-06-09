@@ -146,14 +146,14 @@ class EncoderRNN(nn.Module):
         self.embedding = nn.Embedding(input_size, hidden_size)
         self.lstm = nn.LSTM(hidden_size, hidden_size)
 
-    def forward(self, input, hidden):
+    def forward(self, input, hidden, c):
         embedded = self.embedding(input).view(1, 1, -1)
         output = embedded
-        output, hidden = self.lstm(output, hidden)
-        return output, hidden
+        output, (hidden, c) = self.lstm(output, (hidden,c))
+        return output, (hidden, c)
 
     def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+        return (torch.zeros(1, 1, self.hidden_size, device=device),torch.zeros(1, 1, self.hidden_size, device=device))
 
 # modified BiLSTM from:
 # https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/bidirectional_recurrent_neural_network/main.py
@@ -247,7 +247,7 @@ def train(input_tensor, supertag_tensor, target_tensor,
             encoder, supertag_encoder, decoder, 
             encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, 
             criterion, max_length=MAX_LENGTH, bidir_supertags=BIDIR_SUPERTAGS):
-    encoder_hidden = encoder.initHidden()
+    encoder_hidden, encoder_c = encoder.initHidden()
     if bidir_supertags:
         supertag_hidden, c0 = supertag_encoder.initHidden()
     else:
@@ -270,8 +270,8 @@ def train(input_tensor, supertag_tensor, target_tensor,
     loss = 0
 
     for ei in range(input_length):
-        encoder_output, encoder_hidden = encoder(
-            input_tensor[ei], encoder_hidden)
+        encoder_output, (encoder_hidden, encoder_c) = encoder(
+            input_tensor[ei], (encoder_hidden, encoder_c))
         encoder_outputs[ei] = encoder_output[0, 0]
 
     for ei in range(supertag_length):
@@ -390,7 +390,7 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
         input_length = input_tensor.size()[0]
         supertag_length = supertag_tensor.size()[0]
 
-        encoder_hidden = encoder.initHidden()
+        encoder_hidden, encoder_c = encoder.initHidden()
         if bidir_supertags:
             supertag_hidden, c0 = supertag_encoder.initHidden()
         else: 
@@ -405,8 +405,8 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
         # supertag_enc_outputs = torch.zeros(max_length, 2*supertag_encoder.hidden_size, device=device)
 
         for ei in range(input_length):
-            encoder_output, encoder_hidden = encoder(input_tensor[ei],
-                                                     encoder_hidden)
+            encoder_output, (encoder_hidden, encoder_c) = encoder(input_tensor[ei],
+                                                     (encoder_hidden, encoder_c))
             encoder_outputs[ei] += encoder_output[0, 0]
 
         for ei in range(supertag_length):
