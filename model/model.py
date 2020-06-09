@@ -29,11 +29,11 @@ EOS_token = 1
 MAX_LENGTH = 15
 MIN_LENGTH = 7
 
-HIDDEN_SIZE = 256
-BIDIR_SUPERTAGS = False
-TRAIN_DIR = 'linear-hierarchical-experiment/train'
-TEST_DIR = 'linear-hierarchical-experiment/test'
-SAVE_DIR = '4-17-20-lin-uni-256/'
+HIDDEN_SIZE = 100
+BIDIR_SUPERTAGS = True
+TRAIN_DIR = 'new-data/train'
+TEST_DIR = 'new-data/test'
+SAVE_DIR = 'new-data-bidir-lin-100/'
 NUM_ITERATIONS = 250000
 
 class Lang:
@@ -93,16 +93,16 @@ def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
         prefix = 'test'
 
     # Read the file and split into lines
-    ref_lines = open('{}/{}-ref-ordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
+    ref_lines = open('{}/{}-ref-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
     
-    para_lines = open('{}/{}-para-ordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
+    para_lines = open('{}/{}-para-words.txt'.format(data_dir, prefix), encoding='utf-8').\
         read().strip().split('\n')
 
     if openNMT:
         tags = open('{}/{}-opennmt-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
     else:
-        tags = open('{}/{}-para-ordered-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+        tags = open('{}/{}-para-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
     
     # Split every line into pairs and normalize
     pairs = list(zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines], tags))
@@ -144,12 +144,12 @@ class EncoderRNN(nn.Module):
         self.hidden_size = hidden_size
 
         self.embedding = nn.Embedding(input_size, hidden_size)
-        self.gru = nn.GRU(hidden_size, hidden_size)
+        self.lstm = nn.LSTM(hidden_size, hidden_size)
 
     def forward(self, input, hidden):
         embedded = self.embedding(input).view(1, 1, -1)
         output = embedded
-        output, hidden = self.gru(output, hidden)
+        output, hidden = self.lstm(output, hidden)
         return output, hidden
 
     def initHidden(self):
@@ -197,7 +197,7 @@ class AttnDecoderRNN(nn.Module):
             self.attn = nn.Linear(self.hidden_size * 3, self.max_length)
             self.attn_combine = nn.Linear(self.hidden_size * 3, self.hidden_size)
         self.dropout = nn.Dropout(self.dropout_p)
-        self.gru = nn.GRU(self.hidden_size, self.hidden_size)
+        self.lstm = nn.LSTM(self.hidden_size, self.hidden_size)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, input, hidden, encoder_outputs, supertag_hidden):
@@ -217,7 +217,7 @@ class AttnDecoderRNN(nn.Module):
 
         output = F.relu(output)
         # output = torch.cat((output, hidden[:,:,self.hidden_size:]),2)
-        output, hidden = self.gru(output, hidden)
+        output, hidden = self.lstm(output, hidden)
 
         output = F.log_softmax(self.out(output[0]), dim=1)
         return output, hidden, attn_weights

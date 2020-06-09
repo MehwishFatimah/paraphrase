@@ -19,9 +19,9 @@ from model import EncoderRNN, BiLSTM, AttnDecoderRNN, prepareData, evaluate
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-SAVE_DIR = '4-17-20-lin-uni-256/'
-BIDIR_SUPERTAGS = False
-HIDDEN_SIZE = 256
+HIDDEN_SIZE = 100
+BIDIR_SUPERTAGS = True
+SAVE_DIR = 'new-data-bidir-lin-100/'
 NUM_ITERATIONS = 250000
 
 if __name__ == '__main__':
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True, openNMT=False)
 
 
-    with open(SAVE_DIR + 'test-uni-256-linear-output.txt', 'w') as f:
+    with open(SAVE_DIR + 'test-bidir-100.txt', 'w') as f:
         for pair in test_pairs:
             output_words, attentions = evaluate(encoder1, supertag_encoder1, attn_decoder1, pair[0], pair[2], input_lang, supertag_lang, output_lang, bidir_supertags=BIDIR_SUPERTAGS)
             output_sentence = ' '.join(output_words)
