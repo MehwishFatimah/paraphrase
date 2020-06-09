@@ -200,7 +200,7 @@ class AttnDecoderRNN(nn.Module):
         self.lstm = nn.LSTM(self.hidden_size, self.hidden_size)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, input, hidden, encoder_outputs, supertag_hidden):
+    def forward(self, input, hidden, c, encoder_outputs, supertag_hidden):
         embedded = self.embedding(input).view(1, 1, -1)
         embedded = self.dropout(embedded)
 
@@ -217,13 +217,13 @@ class AttnDecoderRNN(nn.Module):
 
         output = F.relu(output)
         # output = torch.cat((output, hidden[:,:,self.hidden_size:]),2)
-        output, hidden = self.lstm(output, hidden)
+        output, (hidden, c) = self.lstm(output, (hidden, c))
 
         output = F.log_softmax(self.out(output[0]), dim=1)
-        return output, hidden, attn_weights
+        return output, hidden, c, attn_weights
 
     def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+        return torch.zeros(1, 1, self.hidden_size, device=device), torch.zeros(1, 1, self.hidden_size, device=device)
 
 
 def indexesFromSentence(lang, sentence):
@@ -288,6 +288,7 @@ def train(input_tensor, supertag_tensor, target_tensor,
     decoder_input = torch.tensor([[SOS_token]], device=device)
 
     decoder_hidden = encoder_hidden
+    decoder_c = encoder_c
     # decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
     
     use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
@@ -295,16 +296,16 @@ def train(input_tensor, supertag_tensor, target_tensor,
     if use_teacher_forcing:
         # Teacher forcing: Feed the target as the next input
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs, supertag_enc_hiddens[di])
+            decoder_output, decoder_hidden, decoder_c, decoder_attention = decoder(
+                decoder_input, decoder_hidden, decoder_c, encoder_outputs, supertag_enc_hiddens[di])
             loss += criterion(decoder_output, target_tensor[di])
             decoder_input = target_tensor[di]  # Teacher forcing
 
     else:
         # Without teacher forcing: use its own predictions as the next input
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs, supertag_enc_hiddens[di])
+            decoder_output, decoder_hidden, decoder_c, decoder_attention = decoder(
+                decoder_input, decoder_hidden, decoder_c, encoder_outputs, supertag_enc_hiddens[di])
             topv, topi = decoder_output.topk(1)
             decoder_input = topi.squeeze().detach()  # detach from history as input
 
@@ -422,6 +423,7 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
         decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
 
         decoder_hidden = encoder_hidden
+        decoder_c = encoder_c
         # decoder_hidden = torch.cat((encoder_hidden, supertag_hidden.view(1,1,-1)), dim=2).view(1,1,-1)
 
 
@@ -429,8 +431,8 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
         decoder_attentions = torch.zeros(max_length, max_length)
 
         for di in range(max_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs, supertag_enc_hiddens[di])
+            decoder_output, decoder_hidden, decoder_c, decoder_attention = decoder(
+                decoder_input, decoder_hidden, decoder_c, encoder_outputs, supertag_enc_hiddens[di])
             decoder_attentions[di] = decoder_attention.data
             topv, topi = decoder_output.data.topk(1)
             if topi.item() == EOS_token:
