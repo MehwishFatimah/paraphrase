@@ -271,7 +271,7 @@ def train(input_tensor, supertag_tensor, target_tensor,
 
     for ei in range(input_length):
         encoder_output, (encoder_hidden, encoder_c) = encoder(
-            input_tensor[ei], (encoder_hidden, encoder_c))
+            input_tensor[ei], encoder_hidden, encoder_c)
         encoder_outputs[ei] = encoder_output[0, 0]
 
     for ei in range(supertag_length):
@@ -406,7 +406,7 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
 
         for ei in range(input_length):
             encoder_output, (encoder_hidden, encoder_c) = encoder(input_tensor[ei],
-                                                     (encoder_hidden, encoder_c))
+                                                     encoder_hidden, encoder_c)
             encoder_outputs[ei] += encoder_output[0, 0]
 
         for ei in range(supertag_length):
