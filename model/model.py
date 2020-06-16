@@ -15,6 +15,8 @@ import numpy as np
 from torch import optim
 import torch.nn.functional as F
 
+from attention import DotproductAttention
+
 # following code adapted from: 
 # https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
 
@@ -33,8 +35,8 @@ HIDDEN_SIZE = 100
 BIDIR_SUPERTAGS = True
 TRAIN_DIR = 'new-data/train'
 TEST_DIR = 'new-data/test'
-SAVE_DIR = 'new-data-bidir-lin-100/'
-NUM_ITERATIONS = 250000
+SAVE_DIR = 'new-data-bidir-lin-100-attn/'
+NUM_ITERATIONS = 500000
 
 class Lang:
     def __init__(self, name):
@@ -182,7 +184,7 @@ class BiLSTM(nn.Module):
     
 
 class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH, bidir_supertags=BIDIR_SUPERTAGS):
+    def __init__(self, attn, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH, bidir_supertags=BIDIR_SUPERTAGS):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -190,25 +192,37 @@ class AttnDecoderRNN(nn.Module):
         self.max_length = max_length
 
         self.embedding = nn.Embedding(self.output_size, self.hidden_size)
+        self.attn = attn
         if bidir_supertags:
-            self.attn = nn.Linear(self.hidden_size * 4, self.max_length)
+            self.hidden_combine = nn.Linear(self.hidden_size * 4, self.hidden_size)
             self.attn_combine = nn.Linear(self.hidden_size * 4, self.hidden_size)
         else:
-            self.attn = nn.Linear(self.hidden_size * 3, self.max_length)
+            self.hidden_combine = nn.Linear(self.hidden_size * 3, self.hidden_size)
             self.attn_combine = nn.Linear(self.hidden_size * 3, self.hidden_size)
         self.dropout = nn.Dropout(self.dropout_p)
         self.lstm = nn.LSTM(self.hidden_size, self.hidden_size)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, input, hidden, c, encoder_outputs, supertag_hidden):
-        embedded = self.embedding(input).view(1, 1, -1)
+    def forward(self, inpt, hidden, c, encoder_outputs, supertag_hidden):
+        embedded = self.embedding(inpt).view(1, 1, -1)
         embedded = self.dropout(embedded)
 
         # concat supertag hidden for current tag with embedded input
         inp = torch.cat((embedded[0], supertag_hidden.view(1,-1)), 1)
+        inp_hidden = self.hidden_combine(torch.cat((inp, hidden[0]), 1))
 
-        attn_weights = F.softmax(
-            self.attn(torch.cat((inp, hidden[0]), 1)), dim=1)
+        # positional attention
+        # attn_weights = F.softmax(
+            # self.attn(torch.cat((inp, hidden[0]), 1)), dim=1)
+
+
+        # encoder_attn = self.attn2(encoder_outputs)
+        # dot(attn_weights, encoder_attn)
+        # multiply this by encoder outputs to get attn
+
+        # use DotProductAttention module
+        attn_weights = self.attn(encoder_outputs, inp_hidden)
+
         attn_applied = torch.bmm(attn_weights.unsqueeze(0),
                                  encoder_outputs.unsqueeze(0))
 
@@ -470,7 +484,9 @@ if __name__ == '__main__':
     else:
         supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
-    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=BIDIR_SUPERTAGS).to(device)
+    attn = DotproductAttention()
+
+    attn_decoder1 = AttnDecoderRNN(attn, hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=BIDIR_SUPERTAGS).to(device)
 
     trainIters(encoder1, supertag_encoder1, attn_decoder1, NUM_ITERATIONS, print_every=10000, bidir_supertags=BIDIR_SUPERTAGS)
     evaluateRandomly(encoder1, supertag_encoder1, attn_decoder1, input_lang, supertag_lang, output_lang)

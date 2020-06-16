@@ -21,8 +21,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 HIDDEN_SIZE = 100
 BIDIR_SUPERTAGS = True
-SAVE_DIR = 'new-data-bidir-lin-100/'
-NUM_ITERATIONS = 250000
+SAVE_DIR = 'new-data-bidir-lin-100-attn/'
+NUM_ITERATIONS = 500000
 
 if __name__ == '__main__':
     input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para', test=False)
