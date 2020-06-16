@@ -35,7 +35,7 @@ HIDDEN_SIZE = 100
 BIDIR_SUPERTAGS = True
 TRAIN_DIR = 'new-data/train'
 TEST_DIR = 'new-data/test'
-SAVE_DIR = 'new-data-bidir-lin-100-attn/'
+SAVE_DIR = 'new-data-bidir-lin-100-attn2/'
 NUM_ITERATIONS = 500000
 
 class Lang:
@@ -378,6 +378,7 @@ def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, pl
             torch.save(encoder.state_dict(), SAVE_DIR + 'encoder_step_{}.pt'.format(iter))
             torch.save(supertag_encoder.state_dict(), SAVE_DIR + 'supertag_encoder_step_{}.pt'.format(iter))
             torch.save(decoder.state_dict(), SAVE_DIR + 'decoder_step_{}.pt'.format(iter))
+            torch.save(attn.state_dict(), SAVE_DIR + 'attn_step_{}.pt'.format(iter))
 
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                          iter, iter / n_iters * 100, print_loss_avg))
@@ -484,7 +485,7 @@ if __name__ == '__main__':
     else:
         supertag_encoder1 = EncoderRNN(supertag_lang.n_words, hidden_size).to(device)
 
-    attn = DotproductAttention()
+    attn = DotproductAttention().to(device)
 
     attn_decoder1 = AttnDecoderRNN(attn, hidden_size, output_lang.n_words, dropout_p=0.1, bidir_supertags=BIDIR_SUPERTAGS).to(device)
 

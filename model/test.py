@@ -16,12 +16,13 @@ from torch import optim
 import torch.nn.functional as F
 
 from model import EncoderRNN, BiLSTM, AttnDecoderRNN, prepareData, evaluate
+from attention import DotproductAttention
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 HIDDEN_SIZE = 100
 BIDIR_SUPERTAGS = True
-SAVE_DIR = 'new-data-bidir-lin-100-attn/'
+SAVE_DIR = 'new-data-bidir-lin-100-attn2/'
 NUM_ITERATIONS = 500000
 
 if __name__ == '__main__':
@@ -42,7 +43,11 @@ if __name__ == '__main__':
     supertag_encoder1.load_state_dict(torch.load(SAVE_DIR + 'supertag_encoder_step_{}.pt'.format(NUM_ITERATIONS)))
     supertag_encoder1.eval()
 
-    attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1,bidir_supertags=BIDIR_SUPERTAGS).to(device)
+    attn = DotproductAttention().to(device)
+    attn.load_state_dict(torch.load(SAVE_DIR + 'attn_step_{}.pt'.format(NUM_ITERATIONS)))
+    attn.eval()
+
+    attn_decoder1 = AttnDecoderRNN(attn, hidden_size, output_lang.n_words, dropout_p=0.1,bidir_supertags=BIDIR_SUPERTAGS).to(device)
     attn_decoder1.load_state_dict(torch.load(SAVE_DIR + 'decoder_step_{}.pt'.format(NUM_ITERATIONS)))
     attn_decoder1.eval()
 
