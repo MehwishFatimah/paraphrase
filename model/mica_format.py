@@ -1,3 +1,4 @@
+''' Formats words, supertags, and parts of speech for input to the MICA parser'''
 DATA_DIR = '../data/artificial-data/set-2/test/'
 PREFIX = 'test-opennmt'
 TYPE = ''

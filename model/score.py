@@ -1,3 +1,4 @@
+''' Implements a variety of scoring metrics for model evaluation '''
 from rouge import Rouge, FilesRouge
 import numpy as np
 import nltk

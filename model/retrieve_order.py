@@ -1,3 +1,4 @@
+''' Reconstructs a linear order from model outputs using the original order of the target paraphrase '''
 OUTPUT_DIR = 'linear-hierarchical-experiment/model-outputs/bidirectional-50/500k-iter/'
 DATA_DIR = 'linear-hierarchical-experiment/test/'
 PREFIX = 'test'

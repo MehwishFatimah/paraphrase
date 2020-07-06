@@ -1,4 +1,4 @@
-
+''' Generates hierarchically-ordered data from a MICA parse. '''
 DATA_DIR = 'linear-hierarchical-experiment/active-passive/'
 PREFIX = 'act-pass'
 

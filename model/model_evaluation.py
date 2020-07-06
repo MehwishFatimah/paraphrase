@@ -1,3 +1,4 @@
+''' Statistical model evaluation functions'''
 import nltk
 import pickle
 import editdistance
@@ -21,6 +22,7 @@ def read_seqs(filename):
     return seq
 
 def word_match(gold, output, allow_synonyms=True):
+    ''' Checks if two words are the same or synonyms '''
     if gold != output:
         if allow_synonyms:
             pos = nltk.pos_tag([gold])[0][1]
@@ -37,6 +39,7 @@ def word_match(gold, output, allow_synonyms=True):
     return True
 
 def item_for_item_accuracy(gold, output, allow_synonyms):
+    ''' Returns the percentage of items in output that are in gold, allowing for synonyms if allow_synonyms is true '''
     correct_items = 0
     for gold_item, output_item in zip(gold, output):
         if allow_synonyms:
@@ -49,6 +52,7 @@ def item_for_item_accuracy(gold, output, allow_synonyms):
     return acc
 
 def avg_item_for_item_accuracy(gold_seqs, output_seqs, allow_synonyms=False):
+    ''' Returns the average item for item accuracy between two corpora.'''
     total_acc = 0
     for gold, output in zip(gold_seqs, output_seqs):
         total_acc += item_for_item_accuracy(gold, output, allow_synonyms)
@@ -57,6 +61,7 @@ def avg_item_for_item_accuracy(gold_seqs, output_seqs, allow_synonyms=False):
     return avg_acc
 
 def word_for_supertag_accuracy(gold_words, output_words, gold_stags, output_stags, allow_synonyms=False):
+    ''' Returns the word-for-word accuracy for words that were assigned the correct supertag '''
     correct_words = 0
     correct_supertags = 0
     for gold_word, output_word, gold_stag, output_stag in zip(gold_words, output_words, gold_stags, output_stags):
@@ -73,6 +78,7 @@ def word_for_supertag_accuracy(gold_words, output_words, gold_stags, output_stag
     return acc
 
 def avg_word_for_supertag_accuracy(gold_sents, output_sents, gold_supertags, output_supertags, allow_synonyms=False):
+    ''' Returns the average word-for-supertag accuracy between two corpora'''
     total_acc = 0
     total_sents = 0
     for gold_sent, output_sent, gold_stags, output_stags in zip(gold_sents, output_sents, gold_supertags, output_supertags):
@@ -86,20 +92,20 @@ def avg_word_for_supertag_accuracy(gold_sents, output_sents, gold_supertags, out
 
 # DATA_DIR = 'linear-hierarchical-experiment/test/'
 # OUTPUT_DIR = 'linear-hierarchical-experiment/model-outputs/unidirectional-256-2/'
-DATA_DIR = '../data/artificial-data/set-2/test/'
-OUTPUT_DIR = '../data/artificial-data/set-2/test/'
+DATA_DIR = 'new-data/test/'
+OUTPUT_DIR = 'new-data-bidir-lin-100/'
 PREFIX = 'test'
 
-# ref_sents = read_seqs(DATA_DIR + PREFIX + '-ref-ordered-words.txt')
+# ref_sents = read_seqs(DATA_DIR + PREFIX + '-ref-words.txt')
 para_sents = read_seqs(DATA_DIR + PREFIX + '-para-words.txt')
-output_sents = read_seqs(OUTPUT_DIR + PREFIX + '-opennmt-output.txt')
+output_sents = read_seqs(OUTPUT_DIR + PREFIX + '-bidir-100.txt')
 
 para_supertags = read_seqs(DATA_DIR + PREFIX + '-para-supertags.txt')
-output_supertags = read_seqs(OUTPUT_DIR + PREFIX + '-opennmt-supertags.txt')
+output_supertags = read_seqs(OUTPUT_DIR + PREFIX + '-bidir-100-supertags.txt')
 
 
 print('Average word-for-word accuracy: ', avg_item_for_item_accuracy(para_sents, output_sents))
 print('Average word-for-word accuracy allowing synonyms:', avg_item_for_item_accuracy(para_sents, output_sents, allow_synonyms=True))
 print('Average supertag-for-supertag accuracy: ', avg_item_for_item_accuracy(para_supertags, output_supertags))
-print('Of correct supertags, average word accuracy: ', avg_word_for_supertag_accuracy(para_sents, output_sents, para_supertags, output_supertags))
-print('Of correct supertags, average word accuracy allowing synonyms:', avg_word_for_supertag_accuracy(para_sents, output_sents, para_supertags, output_supertags, allow_synonyms=True))
+# print('Of correct supertags, average word accuracy: ', avg_word_for_supertag_accuracy(para_sents, output_sents, para_supertags, output_supertags))
+# print('Of correct supertags, average word accuracy allowing synonyms:', avg_word_for_supertag_accuracy(para_sents, output_sents, para_supertags, output_supertags, allow_synonyms=True))
