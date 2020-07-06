@@ -1,0 +1,18 @@
+1 a DT 3 duck NN t1 t3 1||cat:D dsubcat:nil ssubcat:nil  comp:n root:D lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj 
+2 tiny JJ 3 duck NN t36 t3 1||cat:A dsubcat:nil ssubcat:nil  pred:- comp:n root:A lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj 
+3 duck NN 5 complimented VBN t3 t331 2||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:1 SRole:0
+4 was VBD 5 complimented VBN t23 t331 3||cat:V dsubcat:nil ssubcat:nil  voice:act comp:n root:V lfront:nil rfront:nil intern:nil modif:VP dir:LEFT adjnodes:VP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj 
+5 complimented VBN 5 complimented VBN t331 t331 0||cat:V dsubcat:NP0_NP1 ssubcat:NP0_NP2(P) voice:pas_by comp:n root:S lfront:NP#s#1 rfront:IN#c_NP#s#0 intern:-NONE-_NP_PP_VP coanc:by adjnodes:NP_PP_S_VP substnodes:nil DSub:01 SSub:02 DRIO:10 SRIO:02 DRole:Root SRole:Root 
+6 by IN 5 complimented VBN tCO t331 9|| DRole:CoHead SRole:CoHead 
+7 a DT 9 duck NN t1 t3 1||cat:D dsubcat:nil ssubcat:nil  comp:n root:D lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj 
+8 tiny JJ 9 duck NN t36 t3 1||cat:A dsubcat:nil ssubcat:nil  pred:- comp:n root:A lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj 
+9 duck NN 5 complimented VBN t3 t331 11||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:0 SRole:2
+10 in IN 5 complimented VBN t13 t331 13||cat:IN dsubcat:NP1 ssubcat:NP1 pred:- comp:n root:PP lfront:nil rfront:NP#s#1 intern:nil modif:VP dir:RIGHT adjnodes:PP_VP substnodes:nil DSub:1 SSub:1 DRIO:1 SRIO:1 DRole:Adj SRole:Adj 
+11 a DT 12 market NN t1 t3 1||cat:D dsubcat:nil ssubcat:nil  comp:n root:D lfront:nil rfront:nil intern:nil modif:NP dir:LEFT adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj 
+12 market NN 10 in IN t3 t13 5||cat:N dsubcat:nil ssubcat:nil  pred:- comp:n root:NP lfront:nil rfront:nil intern:nil adjnodes:NP substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:1 SRole:1
+13 . . 5 complimented VBN t26 t331 14||cat:. dsubcat:nil ssubcat:nil  comp:n root:. lfront:nil rfront:nil intern:nil modif:S dir:RIGHT adjnodes:S substnodes:nil DSub:nil SSub:nil DRIO: SRIO: DRole:Adj SRole:Adj 
+# lp=-9.152966|| DRole:E SRole:E
+...EOS...//...EOS...//...EOS...
+...EOS...//...EOS...//...EOS...
+...NEW...//...NEW...//...NEW...
+...NEW...//...NEW...//...NEW...
