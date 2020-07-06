@@ -1,3 +1,4 @@
+''' Lexicalized Context Free Grammar used to generate artificial dataset 2 and the linear-hierarchical dataset.'''
 import random
 import numpy as np 
 import pickle
@@ -38,6 +39,7 @@ class Constituent:
         return Constituent(self.name, None, ccopies, self.is_leaf)
         
     def bracketed_tree(self):
+        ''' Returns a string containing the tree in bracketed notation '''
         ret = " ( " + self.name 
     
         for child in self.children:
@@ -49,6 +51,7 @@ class Constituent:
         return ret
         
     def sentence(self):
+        ''' Returns a string containing the sentence represented by the tree with words separated by spaces'''
         ret = ""
         for child in self.children:
             if child.is_leaf:
@@ -156,6 +159,7 @@ lexicon = [Word('N', w) for w in agent_nouns] + \
 
 
 def generate_tree(start, parent, lexicon):
+    ''' Generates a tree with the given start token, selecting a rule at random and words from the provided lexicon '''
     tree = Constituent(start, parent)
     poss_rules = [rule for rule in sent_rules if rule.lhs == start]
     if poss_rules:
@@ -169,6 +173,7 @@ def generate_tree(start, parent, lexicon):
     return tree
     
 def add_pp_front(sent):
+    ''' Adds a PP to the front of a Constituent sent '''
     s = Constituent('S', None)
     sent.parent = s
     pp = generate_tree('PP', s, lexicon)
@@ -176,6 +181,7 @@ def add_pp_front(sent):
     return s
 
 def add_pp_end(sent):
+    ''' Adds a PP to the end of a Constituent sent '''
     s = Constituent('S', None)
     sent.parent = s
     pp = generate_tree('PP', s, lexicon)
@@ -183,6 +189,7 @@ def add_pp_end(sent):
     return s
 
 def remove_pp(tree, drop_p=0.5):
+    ''' Removes PPs from a Contituent tree with probability drop_p '''
     if tree.name == 'PP' and np.random.uniform() <= drop_p:
         return
     new_children = []
@@ -195,11 +202,13 @@ def remove_pp(tree, drop_p=0.5):
     return tree
 
 def remove_leading_comma(tree):
+    ''' Removes a leading comma from deleting a PP from a Constituent tree'''
     if tree.children[0].name == ',':
         tree.children.pop(0)
     return tree
 
 def most_common_syn(word, pos):
+    ''' Retrieves the most common synonym of a word with associate part of speech'''
     synsets = wn.synsets(word, pos)
     max_freq = 0
     most_common = None
@@ -217,6 +226,7 @@ def most_common_syn(word, pos):
     return most_common
 
 def substitute_synonyms(sent, sub_freq=0.5):
+    ''' Substitutes synonyms into a string sent with frequency sub_freq '''
     output_seq = []
     for word in sent.split(' '):
         output_word = word
@@ -233,6 +243,7 @@ def substitute_synonyms(sent, sub_freq=0.5):
     return ' '.join(output_seq)
 
 def generate_act_pass_pair():
+    ''' Generates a pair of Constituent trees representing the active and passive forms of a sentence '''
     # generate tree using active verbs only
     act_tree = generate_tree('S', None, [w for w in lexicon if w.word not in passive_verbs])
     np1 = act_tree.children[0] # left child of S
@@ -252,6 +263,7 @@ def generate_act_pass_pair():
     return (act_tree, pass_tree)
 
 def generate_move_pp_pair():
+    ''' Generates a pair of Constituent trees representing two forms of a sentence with PPs in different locations.'''
     sent1 = generate_tree('S', None, lexicon)
     sent2 = sent1.copy()
 
@@ -268,6 +280,7 @@ def generate_move_pp_pair():
     return (s1, s2)
 
 def generate_modal_pair(allow_pp=True):
+    ''' Generates a pair of Constituent trees representing two forms of a sentence with different modals.'''
     sent1 = generate_tree('S', None, lexicon)
     sent2 = sent1.copy()
     v1 = sent1.children[1].children[0]
@@ -290,6 +303,7 @@ def generate_modal_pair(allow_pp=True):
 
 MAX_LENGTH = 15
 def generate_pairs(n, filename, pair_fns):
+    ''' Generates many paraphrase pairs and saves them using filename as a prefix'''
     with open(filename + '_pairs.txt', 'w') as f:
         with open(filename + '_ref_words.txt', 'w') as r:
             with open(filename + '_para_words.txt', 'w') as p:
@@ -336,6 +350,7 @@ def generate_pairs(n, filename, pair_fns):
 
 
 def generate_act_pass_pairs(n, path):
+    ''' Generates n active/passive pairs and saves them to path'''
     with open(path + 'act-pass-pairs.txt', 'w') as pairs:
         with open(path + 'act-pass-ref.txt', 'w') as ref:
             with open(path + 'act-pass-para.txt', 'w') as para:
@@ -357,6 +372,7 @@ def generate_act_pass_pairs(n, path):
 # generate_act_pass_pairs(25000, '../data/artificial-data/set-2/active-passive/')
 
 def generate_modal_pairs(n, path):
+    ''' Generates n modal pairs and saves them to path '''
     with open(path + 'modal-pairs.txt', 'w') as pairs:
         with open(path + 'modal-ref.txt', 'w') as ref:
             with open(path + 'modal-para.txt', 'w') as para:
@@ -384,6 +400,7 @@ def generate_modal_pairs(n, path):
 
 
 def get_synonym_list():
+    ''' Creates a list of synonyms for each noun, adjective, and verb in the lexicon '''
     syn_list = set()
     for word in agent_nouns:
         synonym = most_common_syn(word, wn.NOUN)
