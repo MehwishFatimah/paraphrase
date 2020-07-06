@@ -1,3 +1,4 @@
+''' Loads saved models from checkpoints and runs evaluation on a full test set.'''
 from io import open
 import unicodedata
 import string

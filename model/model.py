@@ -1,3 +1,5 @@
+''' This module contains the encoder, decoder, supertag encoder, training, and evaluation code for paraphrase generation.
+    Modify the model parameters and save paths, then `python model.py` to train the model.'''
 from io import open
 import unicodedata
 import string
@@ -31,14 +33,16 @@ EOS_token = 1
 MAX_LENGTH = 15
 MIN_LENGTH = 7
 
+# UPDATE THESE PARAMETERS FOR EACH MODEL RUN
 HIDDEN_SIZE = 100
 BIDIR_SUPERTAGS = True
-TRAIN_DIR = 'new-data/train'
-TEST_DIR = 'new-data/test'
-SAVE_DIR = 'new-data-bidir-lin-100-attn2/'
+TRAIN_DIR = 'new-data/train' # location of training data
+TEST_DIR = 'new-data/test' # location of test data
+SAVE_DIR = 'new-data-bidir-lin-100-attn2/' # where to save model checkpoints
 NUM_ITERATIONS = 500000
 
 class Lang:
+    ''' Holds textual data with index dictionaries '''
     def __init__(self, name):
         self.name = name
         self.word2index = {}
@@ -60,6 +64,7 @@ class Lang:
             self.word2count[word] += 1
 
 def filterPair(p):
+    ''' Returns True if all three sequences in p are shorter than MAX_LENGTH '''
     return len(p[0].split(' ')) < MAX_LENGTH and \
         len(p[1].split(' ')) < MAX_LENGTH and \
             len(p[2].split(' ')) < MAX_LENGTH # and \
@@ -69,6 +74,7 @@ def filterPair(p):
 
 
 def filterPairs(pairs):
+    ''' Removes pairs that do not meet conditions in filterPair '''
     return [pair for pair in pairs if filterPair(pair)]
 
 # Turn a Unicode string to plain ASCII, thanks to
@@ -87,6 +93,7 @@ def normalizeString(s):
     return s
 
 def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
+    ''' Reads in data for training or testing. Be sure to update filenames in open statements as needed.'''
     print("Reading lines...")
     data_dir = TRAIN_DIR
     prefix = 'train'
@@ -123,6 +130,7 @@ def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
     return input_lang, output_lang, supertag_lang, pairs
 
 def prepareData(lang1, lang2, test=False, reverse=False, openNMT=False):
+    ''' Reads, filters, and counts data for training and test '''
     input_lang, output_lang, supertag_lang, pairs = readLangs(lang1, lang2, test, reverse, openNMT)
     print("Read %s sentence pairs" % len(pairs))
     pairs = filterPairs(pairs)
@@ -141,6 +149,7 @@ def prepareData(lang1, lang2, test=False, reverse=False, openNMT=False):
 
 
 class EncoderRNN(nn.Module):
+    ''' Basic encoder for the input sentence '''
     def __init__(self, input_size, hidden_size):
         super(EncoderRNN, self).__init__()
         self.hidden_size = hidden_size
@@ -160,6 +169,7 @@ class EncoderRNN(nn.Module):
 # modified BiLSTM from:
 # https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/bidirectional_recurrent_neural_network/main.py
 class BiLSTM(nn.Module):
+    ''' Bidirectional encoder for supertag sequences '''
     def __init__(self, input_size, hidden_size):
         super(BiLSTM, self).__init__()
         self.hidden_size = hidden_size
@@ -184,6 +194,7 @@ class BiLSTM(nn.Module):
     
 
 class AttnDecoderRNN(nn.Module):
+    ''' Decoder that takes in hidden states from the encoder and supertag encoder and uses attention over encoder states'''
     def __init__(self, attn, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH, bidir_supertags=BIDIR_SUPERTAGS):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
@@ -241,16 +252,19 @@ class AttnDecoderRNN(nn.Module):
 
 
 def indexesFromSentence(lang, sentence):
+    ''' Translates a sentence into a sequence of indices corresponding to the vocab'''
     return [lang.word2index[word] for word in sentence.split(' ') if word in lang.word2index]
 
 
 def tensorFromSentence(lang, sentence):
+    ''' Creates a PyTorch Tensor of indices from a sentence '''
     indexes = indexesFromSentence(lang, sentence)
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
 def tensorsFromPair(pair):
+    ''' Creates a Pytorch Tensor for the input sentence, output sentence, and supertag sequence '''
     input_tensor = tensorFromSentence(input_lang, pair[0])
     target_tensor = tensorFromSentence(output_lang, pair[1])
     supertag_tensor = tensorFromSentence(supertag_lang, pair[2])
@@ -261,6 +275,7 @@ def train(input_tensor, supertag_tensor, target_tensor,
             encoder, supertag_encoder, decoder, 
             encoder_optimizer, supertag_encoder_optimizer, decoder_optimizer, 
             criterion, max_length=MAX_LENGTH, bidir_supertags=BIDIR_SUPERTAGS):
+    ''' Performs one training step using the given input_tensor, supertag_tensor, and target_tensor '''
     encoder_hidden, encoder_c = encoder.initHidden()
     if bidir_supertags:
         supertag_hidden, c0 = supertag_encoder.initHidden()
@@ -348,6 +363,7 @@ def timeSince(since, percent):
     return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
 
 def trainIters(encoder, supertag_encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, bidir_supertags=True):
+    ''' Performs n_iters training steps, periodically saving model checkpoints '''
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -399,6 +415,7 @@ def showPlot(points):
     plt.plot(points)
 
 def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang, supertag_lang, output_lang, max_length=MAX_LENGTH, bidir_supertags=True):
+    ''' Uses the trained model to generate a paraphrase for a new sentence and supertag sequence '''
     with torch.no_grad():
         input_tensor = tensorFromSentence(input_lang, sentence)
         supertag_tensor = tensorFromSentence(supertag_lang, supertags)
@@ -461,6 +478,7 @@ def evaluate(encoder, supertag_encoder, decoder, sentence, supertags, input_lang
         return decoded_words, decoder_attentions[:di + 1]
 
 def evaluateRandomly(encoder, supertag_encoder, decoder, input_lang, supertag_lang, output_lang, n=10, bidir_supertags=True):
+    ''' Randomly generates 10 paraphrases for 10 sentence and supertag sequences using the trained model'''
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
