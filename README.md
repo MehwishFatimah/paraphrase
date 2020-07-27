@@ -1,5 +1,4 @@
 # Syntactically-Controlled Paraphrase Generation with Tree-Adjoining Grammar
--- step by step!
 
 This repository contains code and trained models associated with my senior thesis work in Cognitive Science at Yale University. The thesis document is located [here](https://cogsci.yale.edu/sites/default/files/files/2020ThesisWIDDER.pdf).
 With any questions or concerns, please contact the author Sarah Widder at sarah.j.widder@gmail.com.
