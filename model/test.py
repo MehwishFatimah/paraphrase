@@ -23,8 +23,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 HIDDEN_SIZE = 100
 BIDIR_SUPERTAGS = True
-SAVE_DIR = 'new-data-bidir-lin-100-attn2/'
+SAVE_DIR = 'model/model-checkpoints/new-data'
+OUTPUT_DIR = 'data/'
 NUM_ITERATIONS = 500000
+REORDERED = False
 
 if __name__ == '__main__':
     input_lang, output_lang, supertag_lang, pairs = prepareData('ref', 'para', test=False)
@@ -54,8 +56,11 @@ if __name__ == '__main__':
 
     test_input, test_output, test_supertags, test_pairs = prepareData('test-ref', 'test-para', test=True, openNMT=False)
 
+    dr = 'bidir' if BIDIR_SUPERTAGS else 'uni'
+    order = 'hier' if REORDERED else 'lin'
+    save_path = 'test-' + dr + '-' + order + '-' + str(HIDDEN_SIZE) + '-output.txt'
 
-    with open(SAVE_DIR + 'test-bidir-100.txt', 'w') as f:
+    with open(OUTPUT_DIR + save_path, 'w') as f:
         for pair in test_pairs:
             output_words, attentions = evaluate(encoder1, supertag_encoder1, attn_decoder1, pair[0], pair[2], input_lang, supertag_lang, output_lang, bidir_supertags=BIDIR_SUPERTAGS)
             output_sentence = ' '.join(output_words)

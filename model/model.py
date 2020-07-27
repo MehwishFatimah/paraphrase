@@ -36,10 +36,11 @@ MIN_LENGTH = 7
 # UPDATE THESE PARAMETERS FOR EACH MODEL RUN
 HIDDEN_SIZE = 100
 BIDIR_SUPERTAGS = True
-TRAIN_DIR = 'new-data/train' # location of training data
-TEST_DIR = 'new-data/test' # location of test data
-SAVE_DIR = 'new-data-bidir-lin-100-attn2/' # where to save model checkpoints
+TRAIN_DIR = 'data/train' # location of training data
+TEST_DIR = 'data/test' # location of test data
+SAVE_DIR = 'model/model-checkpoints/new-data' # where to save model checkpoints
 NUM_ITERATIONS = 500000
+REORDERED = False
 
 class Lang:
     ''' Holds textual data with index dictionaries '''
@@ -101,18 +102,28 @@ def readLangs(lang1, lang2, test=False, reverse=False, openNMT=False):
         data_dir = TEST_DIR
         prefix = 'test'
 
-    # Read the file and split into lines
-    ref_lines = open('{}/{}-ref-words.txt'.format(data_dir, prefix), encoding='utf-8').\
-        read().strip().split('\n')
-    
-    para_lines = open('{}/{}-para-words.txt'.format(data_dir, prefix), encoding='utf-8').\
-        read().strip().split('\n')
+    if not REORDERED:
+        # Read the file and split into lines
+        ref_lines = open('{}/{}-ref-words.txt'.format(data_dir, prefix), encoding='utf-8').\
+            read().strip().split('\n')
+        
+        para_lines = open('{}/{}-para-words.txt'.format(data_dir, prefix), encoding='utf-8').\
+            read().strip().split('\n')
 
-    if openNMT:
-        tags = open('{}/{}-opennmt-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+        if openNMT:
+            tags = open('{}/{}-opennmt-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+        else:
+            tags = open('{}/{}-para-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
     else:
-        tags = open('{}/{}-para-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
-    
+        # Read the file and split into lines
+        ref_lines = open('{}/{}-ref-ordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
+            read().strip().split('\n')
+        
+        para_lines = open('{}/{}-para-reordered-words.txt'.format(data_dir, prefix), encoding='utf-8').\
+            read().strip().split('\n')
+
+        tags = open('{}/{}-para-reordered-supertags.txt'.format(data_dir, prefix), encoding='utf-8').read().strip().split('\n')
+   
     # Split every line into pairs and normalize
     pairs = list(zip([normalizeString(l) for l in ref_lines], [normalizeString(l) for l in para_lines], tags))
 
