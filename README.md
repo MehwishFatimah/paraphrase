@@ -34,6 +34,8 @@ We will assume your data is located at `data/pairs.txt`, with one pair of paraph
 
     > `(paraphrase)$ conda activate supertagging`
 
+    Before using the pre-trained supertagger for the first time, you'll need to download the pre-trained model from this [link](https://drive.google.com/drive/folders/1CzL7i0jnGT9BhQkM8vmiR-JbRohjIBZI?usp=sharing) and place it in `/bilstm_stagging/tag_pretrained/Pretrained_Stagger/`. See the `bilstm_stagging` README for more info.
+
     Repeat the following steps four times (once for each set of training and test data, reference and paraphrase):
 
     1. Copy and paste the contents of your sentence data (e.g. `data/train-ref-words.txt`) into `bilstm_stagging/tag_pretrained/sents/test.txt`. 
